@@ -18,5 +18,9 @@
 		"twitter"
 	],
 	"author": "Starbeamrainbowlabs",
-	"license": "MPL-2.0"
+	"license": "MPL-2.0",
+	"dependencies": {
+		"applause-cli": "^1.5.1",
+		"got": "^11.8.2"
+	}
 }
