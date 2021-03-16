@@ -1,0 +1,22 @@
+{
+	"name": "phd-social-media",
+	"version": "0.0.1",
+	"description": "Social Media analysis for dynamic mapping of floods",
+	"main": "src/index.mjs",
+	"scripts": {
+		"test": "echo \"No tests have been implemented yet\""
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://git.starbeamrainbowlabs.com/sbrl/PhD-Social-Media"
+	},
+	"keywords": [
+		"social",
+		"media",
+		"ai",
+		"tensorflow.js",
+		"twitter"
+	],
+	"author": "Starbeamrainbowlabs",
+	"license": "MPL-2.0"
+}
