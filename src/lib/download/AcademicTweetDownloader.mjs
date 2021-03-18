@@ -2,15 +2,12 @@
 
 import TwitterApiCredentials from './TwitterApiCredentials.mjs';
 
+import download_json_twitter from './download_json_twitter.mjs';
+
 class AcademicTweetDownloader {
 	constructor() {
-		this.endpoint = `https://api.twitter.com`
 		// TODO: Find a promise-based timer that we can control more precisely than setInterval & clearInterval.
 		this.credentials = null;
-	}
-	
-	make_url(path) {
-		return `${this.endpoint}${path}`;
 	}
 	
 	async setup(filename_credentials) {
@@ -18,6 +15,12 @@ class AcademicTweetDownloader {
 	}
 	
 	
+	full_archive(query) {
+		return await download_json_twitter(
+			this.credentials,
+			`/2/tweets/search/all`
+		);
+	}
 }
 
 AcademicTweetDownloader.Create = (filename_credentials) => {
