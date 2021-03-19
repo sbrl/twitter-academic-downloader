@@ -21,6 +21,7 @@
 	"license": "MPL-2.0",
 	"dependencies": {
 		"applause-cli": "^1.7.0",
+		"bottleneck": "^2.19.5",
 		"got": "^11.8.2"
 	}
 }
