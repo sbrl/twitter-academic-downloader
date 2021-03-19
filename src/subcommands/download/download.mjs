@@ -5,11 +5,15 @@ import path from 'path';
 
 import settings from '../../settings.mjs';
 
+import TweetDownloadManager from '../../lib/download/TweetDownloadManager.mjs';
+
 export default async function () {
 	if(typeof settings.cli.search !== "string")
 		throw new Error(`Error: No search string specified (try --search "query string here").`);
 	if(typeof settings.cli.credentials !== "string")
 		throw new Error(`Error: No credentials file specified (try --credentials path/to/file.toml)`);
+	if(!(setings.cli.start_time instanceof Date))
+		throw new Error(`Error: No time to start downloading tweets froms pecified (type --start-time "YYYY-MM-DD HH:MM")`);
 	if(!fs.existsSync(settings.cli.credentials))
 		throw new Error(`Error: The credentials file at '${settings.cli.credentials}' doesn't exist. Have you checked the spelling and file permissions?`);
 	
@@ -21,5 +25,10 @@ export default async function () {
 		output = fs.createWriteStream(settings.cli.output);
 	}
 	
-	
+	let downloader = await TweetDownloadManager.Create(settings.cli.credentials, output);
+	await downloader.download(
+		settings.cli.search,
+		settings.cli.start_time,
+		settings.cli.end_time
+	);
 }

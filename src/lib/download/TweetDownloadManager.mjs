@@ -5,7 +5,9 @@ import Bottleneck from 'bottleneck';
 import AcademicTweetDownloader from './AcademicTweetDownloader.mjs';
 
 class TweetDownloadManager {
-	constructor() {
+	constructor(stream_output) {
+		this.stream_output = stream_output;
+		
 		this.has_finished = false;
 		
 		this.query = null;
@@ -54,8 +56,8 @@ class TweetDownloadManager {
 	}
 }
 
-TweetDownloadManager.Create = (filename_credentials) => {
-	let result = new TweetDownloadManager();
+TweetDownloadManager.Create = (filename_credentials, output) => {
+	let result = new TweetDownloadManager(output);
 	await result.setup(filename_credentials);
 }
 
