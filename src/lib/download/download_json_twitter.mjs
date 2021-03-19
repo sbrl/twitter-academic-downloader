@@ -24,10 +24,10 @@ export default async function(credentials, path, get_params) {
 	if(typeof process.env.CONTACT_ADDR !== "string")
 		throw new Error(`[download_json_twitter] Error: CONTACT_ADDR environment variable not set to an email address or URL. This email address or URL is sent in the user agent string for informational/contact/abuse purposes.`);
 	
-	return await got(url, {
+	return JSON.parse(await got(url, {
 		headers: {
 			authorization: `Bearer ${credentials.bearer_token}`,
 			"user-agent": `AcademicTweetDownloader/${version} (Node.js/${process.version}; ${os.platform()} ${os.arch()}; ${process.env.CONTACT_ADDR||""}) dynamic-flood-mapping`
 		}
-	});
+	}));
 }
