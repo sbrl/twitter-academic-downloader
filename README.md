@@ -2,7 +2,7 @@
 
 > Social media code for my PhD.
 
-
+TODO: Switch `got` out for [`phin`](https://www.npmjs.com/package/phin) (it's *much* lighter)
 
 ## Usage
 
