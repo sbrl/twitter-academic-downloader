@@ -15,10 +15,11 @@ class AcademicTweetDownloader {
 	}
 	
 	
-	full_archive(query) {
+	async full_archive(params) {
 		return await download_json_twitter(
 			this.credentials,
-			`/2/tweets/search/all`
+			`/2/tweets/search/all`,
+			params
 		);
 	}
 }
