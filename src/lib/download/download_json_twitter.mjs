@@ -30,4 +30,5 @@ export default async function(credentials, path, get_params) {
 			"user-agent": `AcademicTweetDownloader/${version} (Node.js/${process.version}; ${os.platform()} ${os.arch()}; ${process.env.CONTACT_ADDR||""}) dynamic-flood-mapping`
 		}
 	}));
+			"user-agent": `AcademicTweetDownloader/${version} (Node.js/${process.version}; ${os.platform()} ${os.arch()}; ${credentials.contact_address}) dynamic-flood-mapping`
 }

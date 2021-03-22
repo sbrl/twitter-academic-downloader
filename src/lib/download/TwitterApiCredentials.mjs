@@ -15,10 +15,19 @@ class TwitterApiCredentials {
 			throw new Error(`Error: No api_secret_key specified.`);
 		if(typeof result.bearer_token !== "string")
 			throw new Error(`Error: No bearer_token specified.`);
+		// You *really* should be polite when querying the API.
+		if(typeof result.contact_address !== "string") {
+			if(typeof process.env.CONTACT_ADDRESS !== "string")
+				throw new Error(`Error: No contact_address was specified. This email address or URL is sent in the user agent string for informational/contact/abuse purposes.`);
+		}
 		
+		// Note that the 1st 3 here are too sensitive to be stored in an
+		// environment variable, because *anyone* can read the environment of
+		// another process O.o
 		this.api_key = result.api_key;
 		this.api_secret_key = result.api_secret_key;
 		this.bearer_token = result.bearer_token;
+		this.contact_address = result.contact_address || process.env.CONTACT_ADDRESS;
 	}
 }
 
