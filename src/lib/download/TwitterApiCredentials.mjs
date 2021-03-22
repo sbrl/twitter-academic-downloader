@@ -25,6 +25,7 @@ class TwitterApiCredentials {
 TwitterApiCredentials.Load = async (filename) => {
 	let result = new TwitterApiCredentials();
 	await result.load(filename);
+	return result;
 }
 
 export default TwitterApiCredentials;

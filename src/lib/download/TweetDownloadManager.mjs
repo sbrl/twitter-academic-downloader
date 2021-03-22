@@ -16,7 +16,7 @@ class TweetDownloadManager {
 		this.next_token = null;
 	}
 	
-	setup(filename_credentials) {
+	async setup(filename_credentials) {
 		this.downloader = await AcademicTweetDownloader.Create(filename_credentials);
 	}
 	
@@ -56,9 +56,10 @@ class TweetDownloadManager {
 	}
 }
 
-TweetDownloadManager.Create = (filename_credentials, output) => {
+TweetDownloadManager.Create = async (filename_credentials, output) => {
 	let result = new TweetDownloadManager(output);
 	await result.setup(filename_credentials);
+	return result;
 }
 
 export default TweetDownloadManager;

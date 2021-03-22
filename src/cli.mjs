@@ -42,19 +42,16 @@ export default async function () {
 	
 	let settings = (await import("./settings.mjs")).default;
 	settings.cli = settings_cli;
-	console.log(settings);
 	
 	try {
 		await (await import(subcommand_file)).default();
 	}
 	catch(error) {
 		console.error();
-		if(settings.cli.verbose) {
-			l.error(error);
-		}
-		else {
+		if(settings.cli.verbose)
+			throw error;
+		else
 			console.error(`${a.fred}${a.hicol}${error.message}${a.reset}`);
-		}
 		process.exit(1);
 		throw error;
 	}

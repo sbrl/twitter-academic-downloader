@@ -12,7 +12,7 @@ export default async function () {
 		throw new Error(`Error: No search string specified (try --search "query string here").`);
 	if(typeof settings.cli.credentials !== "string")
 		throw new Error(`Error: No credentials file specified (try --credentials path/to/file.toml)`);
-	if(!(setings.cli.start_time instanceof Date))
+	if(!(settings.cli.start_time instanceof Date))
 		throw new Error(`Error: No time to start downloading tweets froms pecified (type --start-time "YYYY-MM-DD HH:MM")`);
 	if(!fs.existsSync(settings.cli.credentials))
 		throw new Error(`Error: The credentials file at '${settings.cli.credentials}' doesn't exist. Have you checked the spelling and file permissions?`);

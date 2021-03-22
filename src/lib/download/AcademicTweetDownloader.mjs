@@ -24,7 +24,7 @@ class AcademicTweetDownloader {
 	}
 }
 
-AcademicTweetDownloader.Create = (filename_credentials) => {
+AcademicTweetDownloader.Create = async (filename_credentials) => {
 	let result = new AcademicTweetDownloader();
 	await result.setup(filename_credentials);
 	return result;
