@@ -23,6 +23,6 @@
 		"@ltd/j-toml": "^1.6.0",
 		"applause-cli": "^1.7.0",
 		"bottleneck": "^2.19.5",
-		"got": "^11.8.2"
+		"phin": "^3.5.1"
 	}
 }

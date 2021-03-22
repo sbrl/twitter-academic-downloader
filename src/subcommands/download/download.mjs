@@ -6,6 +6,7 @@ import path from 'path';
 import settings from '../../settings.mjs';
 
 import TweetDownloadManager from '../../lib/download/TweetDownloadManager.mjs';
+import { write_safe, end_safe } from '../../lib/io/StreamHelpers.mjs';
 
 export default async function () {
 	if(typeof settings.cli.search !== "string")
@@ -26,9 +27,13 @@ export default async function () {
 	}
 	
 	let downloader = await TweetDownloadManager.Create(settings.cli.credentials, output);
-	await downloader.download(
+	
+	let tweet_iterator = await downloader.download(
 		settings.cli.search,
 		settings.cli.start_time,
 		settings.cli.end_time
 	);
+	for await(let tweet of tweet_iterator) {
+		await write_safe(JSON.stringify(tweet));
+	}
 }

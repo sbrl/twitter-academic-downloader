@@ -43,8 +43,9 @@ class TweetDownloadManager {
 	async download_single() {
 		let params = {
 			query: this.query,
-			start_time: this.start_time
+			start_time: this.start_time.toISOString()
 		};
+		console.log(`[TweetDownloadManager:download_single] params`, params);
 		if(this.end_time !== null)
 			params.end_time = this.end_time;
 		if(this.next_token !== null)
