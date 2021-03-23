@@ -27,6 +27,11 @@ class TwitterResponseProcessor {
 			output_dir,
 			"places.jsonl"
 		));
+		
+		this.stream_tweets_with_replies = fs.createWriteStream(path.join(
+			output_dir,
+			"conversation_ids_with_replies.txt"
+		));
 	}
 	
 	async process(response) {
@@ -42,6 +47,8 @@ class TwitterResponseProcessor {
 	}
 	
 	process_tweet(tweet) {
+		if(tweet.public_metrics.reply_count > 0)
+			await write_safe(this.stream_tweets_with_replies, `${tweet.id}\n`);
 		this.anonymiser.anonymise_tweet(tweet);
 		await write_safe(this.stream_tweets, JSON.stringify(tweet));
 	}
