@@ -28,7 +28,7 @@ export default async function () {
 	
 	let downloader = await TweetDownloadManager.Create(settings.cli.credentials, output);
 	
-	let tweet_iterator = await downloader.download(
+	let tweet_iterator = await downloader.download_archive(
 		settings.cli.search,
 		settings.cli.start_time,
 		settings.cli.end_time
