@@ -18,14 +18,21 @@ const endpoint = `https://api.twitter.com`;
 
 export default async function(credentials, path, get_params) {
 	const url = `${endpoint}${path}?${postify(get_params)}`;
-	l.debug(`[download_json_twitter] Fetching URL`, url);
-	
-	return await phin({
+	let response = await phin({
 		url,
 		headers: {
 			authorization: `Bearer ${credentials.bearer_token}`,
 			"user-agent": `AcademicTweetDownloader/${version} (Node.js/${process.version}; ${os.platform()} ${os.arch()}; ${credentials.contact_address}) dynamic-flood-mapping`
-		},
-		parse: "json"
+		}
 	});
+	try {
+		response.body = JSON.parse(response.body);
+	}
+	catch(error) {
+		l.error(`[download_json_twitter] Failed to parse response as JSON.`);
+		l.error(`[download_json_twitter] URL:`, url);
+		l.error(`[download_json_twitter] Status code:`, response.statusCode, "headers:", response.getHeaders());
+		l.error(`[download_json_twitter] Response text:`, response.body);
+		return null;
+	}
 }

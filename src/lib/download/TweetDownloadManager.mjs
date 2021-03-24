@@ -19,6 +19,9 @@ class TweetDownloadManager {
 		this.start_time = null;
 		this.end_time = null;
 		this.next_token = null;
+		
+		this.sym_retry = Symbol.for("SYM_RETRY");
+		this.sym_give_up = Symbol.for("SYM_GIVE_UP");
 	}
 	
 	async setup(filename_credentials) {
@@ -55,7 +58,10 @@ class TweetDownloadManager {
 			// Guarantee at least 1s between requests
 			await sleep_async(1 * 1000);
 			
-			if(response == null) continue;
+			if(response == this.sym_retry) continue;
+			if(response == this.sym_give_up) {
+				process.exit(3);
+			}
 			
 			next_token = response.meta.next_token || null;
 			
@@ -125,12 +131,17 @@ class TweetDownloadManager {
 			params.next_token = next_token;
 		
 		let response = await this.downloader.full_archive(params);
+		
+		if(response == null)
+			return this.sym_give_up;
+		
 		if(response.statusCode < 200 || response.statusCode >= 300) {
 			l.error("Encountered error when making Twitter API request");
 			l.error("Response body: ", response.body);
 			if(response.statusCode == 429) {
 				l.error("Too many requests response detected, waiting 1 minute");
 				await sleep_async(60 * 1000);
+				return this.sym_retry;
 			}
 		}
 		return response.body;
