@@ -52,6 +52,10 @@ class TweetDownloadManager {
 			let time_api = new Date();
 			let response = await this.download_single_wrapped(query, next_token);
 			time_api = new Date() - time_api;
+			// Guarantee at least 1s between requests
+			await sleep_async(1 * 1000);
+			
+			if(response == null) continue;
 			
 			next_token = response.meta.next_token || null;
 			
