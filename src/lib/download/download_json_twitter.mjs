@@ -20,12 +20,12 @@ export default async function(credentials, path, get_params) {
 	const url = `${endpoint}${path}?${postify(get_params)}`;
 	l.debug(`[download_json_twitter] Fetching URL`, url);
 	
-	return (await phin({
+	return await phin({
 		url,
 		headers: {
 			authorization: `Bearer ${credentials.bearer_token}`,
 			"user-agent": `AcademicTweetDownloader/${version} (Node.js/${process.version}; ${os.platform()} ${os.arch()}; ${credentials.contact_address}) dynamic-flood-mapping`
 		},
 		parse: "json"
-	})).body;
+	});
 }

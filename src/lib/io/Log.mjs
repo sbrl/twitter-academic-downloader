@@ -17,6 +17,7 @@ class Log {
 	constructor() {
 		this.start = new Date();
 		
+		// This is set automatically by the CLI
 		this.level = LOG_LEVELS.DEBUG;
 	}
 	

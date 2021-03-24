@@ -20,6 +20,8 @@ class TwitterApiCredentials {
 			if(typeof process.env.CONTACT_ADDRESS !== "string")
 				throw new Error(`Error: No contact_address was specified. This email address or URL is sent in the user agent string for informational/contact/abuse purposes.`);
 		}
+		if(typeof result.anonymise_salt !== "string")
+			throw new Error(`Error: No anonymise_salt specified.`);
 		
 		// Note that the 1st 3 here are too sensitive to be stored in an
 		// environment variable, because *anyone* can read the environment of
@@ -28,6 +30,7 @@ class TwitterApiCredentials {
 		this.api_secret_key = result.api_secret_key;
 		this.bearer_token = result.bearer_token;
 		this.contact_address = result.contact_address || process.env.CONTACT_ADDRESS;
+		this.anonymise_salt = result.anonymise_salt;
 	}
 }
 

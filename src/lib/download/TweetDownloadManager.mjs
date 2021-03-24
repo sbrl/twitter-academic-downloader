@@ -1,14 +1,17 @@
 "use strict";
 
 import Bottleneck from 'bottleneck';
+import pretty_ms from 'pretty-ms';
 
 import l from '../io/Log.mjs';
+import sleep_async from '../async/sleep_async.mjs';
+import TwitterApiCredentials from './TwitterApiCredentials.mjs';
 import AcademicTweetDownloader from './AcademicTweetDownloader.mjs';
-
+import TwitterResponseProcessor from './TwitterResponseProcessor.mjs';
 
 class TweetDownloadManager {
-	constructor(stream_output) {
-		this.stream_output = stream_output;
+	constructor(dir_output) {
+		this.dir_output = dir_output;
 		
 		this.has_finished = false;
 		
@@ -19,10 +22,15 @@ class TweetDownloadManager {
 	}
 	
 	async setup(filename_credentials) {
-		this.downloader = await AcademicTweetDownloader.Create(filename_credentials);
+		this.credentials = await TwitterApiCredentials.Load(filename_credentials);
+		this.downloader = new AcademicTweetDownloader(this.credentials);
+		this.processor = new TwitterResponseProcessor(
+			this.dir_output,
+			this.credentials.anonymise_salt
+		);
 		
 		let limiter = new Bottleneck({
-			minTime: 1000, // 1 request per second
+			minTime: 2000, // 1 request per second (but twitter doesn't like that very much)
 			maxConcurrent: 1,
 			
 			reservoir: 300,
@@ -34,22 +42,35 @@ class TweetDownloadManager {
 		
 	}
 	
-	async *download_archive(query, start_time, end_time = null) {
-		this.query = query;
+	async download_archive(query, start_time, end_time = null) {
 		this.start_time = start_time;
 		this.end_time = end_time;
 		
-		let next_token = null;
-		while(next_token !== null) {
-			let response = yield await this.download_single_wrapped(next_token);
-			if(typeof response.meta.next_token !== "string")
-				next_token = null;
-			else
-				next_token = response.meta.next_token;
+		let next_token = null,
+			totals = { responses: 0, tweets: 0, users: 0, places: 0 };
+		do {
+			let time_api = new Date();
+			let response = await this.download_single_wrapped(query, next_token);
+			time_api = new Date() - time_api;
 			
-			console.log(JSON.stringify(result));
-			process.exit(42);
-		}
+			next_token = response.meta.next_token || null;
+			
+			// Metrics
+			totals.responses++;
+			totals.tweets += response.data.length;
+			if(response.includes.users instanceof Array)
+				totals.users += response.includes.users.length;
+			if(response.includes.places instanceof Array)
+				totals.places += response.includes.places.length;
+			
+			
+			let time_process = new Date();
+			await this.processor.process(response);
+			time_process = new Date() - time_process;
+			
+			// Update CLI
+			process.stdout.write(`[ ${(new Date()).toISOString()} ] ${totals.responses} API calls made; totals: ${totals.tweets} tweets, ${totals.users} users (non-unique), ${totals.places} places (non-unique); timings ${pretty_ms(time_api)} API, ${pretty_ms(time_process)} process \r`);
+		} while(next_token !== null);
 	}
 	
 	/**
@@ -60,7 +81,7 @@ class TweetDownloadManager {
 	 */
 	async download_single(query = null, next_token = null) {
 		let params = {
-			query: query || this.query,
+			query: query,
 			start_time: this.start_time.toISOString(),
 			max_results: 50,
 			"tweet.fields": [
@@ -93,13 +114,22 @@ class TweetDownloadManager {
 				"place_type",
 			].join(",")
 		};
-		l.log(`[TweetDownloadManager:download_single] params`, params);
+		// l.log(`[TweetDownloadManager:download_single] params`, params);
 		if(this.end_time !== null)
 			params.end_time = this.end_time;
-		if(this.next_token !== null)
-			params.next_token = this.next_token;
+		if(next_token !== null)
+			params.next_token = next_token;
 		
-		yield await this.downloader.full_archive(params);
+		let response = await this.downloader.full_archive(params);
+		if(response.statusCode < 200 || response.statusCode >= 300) {
+			l.error("Encountered error when making Twitter API request");
+			l.error("Response body: ", response.body);
+			if(response.statusCode == 429) {
+				l.error("Too many requests response detected, waiting 1 minute");
+				await sleep_async(60 * 1000);
+			}
+		}
+		return response.body;
 	}
 }
 

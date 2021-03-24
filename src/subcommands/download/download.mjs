@@ -17,23 +17,17 @@ export default async function () {
 		throw new Error(`Error: No time to start downloading tweets froms pecified (type --start-time "YYYY-MM-DD HH:MM")`);
 	if(!fs.existsSync(settings.cli.credentials))
 		throw new Error(`Error: The credentials file at '${settings.cli.credentials}' doesn't exist. Have you checked the spelling and file permissions?`);
+	if(typeof settings.cli.output !== "string")
+		throw new Error(`Error: No output directory specified (try --output path/to/directory)`);
 	
-	let output = process.stdout;
-	if(typeof settings.cli.output === "string") {
-		if(!fs.existsSync(path.dirname(settings.cli.output)))
-			throw new Error(`Error: The directory '${path.dirname(settings.cli.output)}' doesn't exist, so the output can't be written to it (have you checked the spelling and directory permissions? On Linux directories need the execute permission as well as the read permission)`);
-		
-		output = fs.createWriteStream(settings.cli.output);
-	}
+	let downloader = await TweetDownloadManager.Create(
+		settings.cli.credentials,
+		settings.cli.output
+	);
 	
-	let downloader = await TweetDownloadManager.Create(settings.cli.credentials, output);
-	
-	let tweet_iterator = await downloader.download_archive(
+	await downloader.download_archive(
 		settings.cli.search,
 		settings.cli.start_time,
 		settings.cli.end_time
 	);
-	for await(let tweet of tweet_iterator) {
-		await write_safe(JSON.stringify(tweet));
-	}
 }

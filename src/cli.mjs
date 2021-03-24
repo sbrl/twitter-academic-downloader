@@ -6,6 +6,7 @@ import fs from 'fs';
 import CliParser from 'applause-cli';
 
 import l from './lib/io/Log.mjs';
+import { LOG_LEVELS } from './lib/io/Log.mjs';
 import a from './lib/io/Ansi.mjs';
 
 const __dirname = import.meta.url.slice(7, import.meta.url.lastIndexOf("/"));
@@ -18,8 +19,9 @@ async function load_subcommands(cli) {
 }
 
 export default async function () {
-	let cli = new CliParser(path.resolve(__dirname, "../package.json"))
-		cli.argument("verbose", "Enable verbose debugging output", null, "boolean");
+	let cli = new CliParser(path.resolve(__dirname, "../package.json"));
+	cli.argument("verbose", "Enable verbose debugging output", null, "boolean")
+		.argument("log-level", "Sets the log level. Value values: DEBUG, INFO (the default), LOG, WARN, ERROR, NONE", "INFO", "string");
 	
 	await load_subcommands(cli);
 	
@@ -27,6 +29,8 @@ export default async function () {
 	
 	if(cli.current_subcommand == null)
 		cli.write_help_exit();
+	
+	l.level = LOG_LEVELS[settings_cli.log_level];
 	
 	let subcommand_file = path.join(
 		__dirname,

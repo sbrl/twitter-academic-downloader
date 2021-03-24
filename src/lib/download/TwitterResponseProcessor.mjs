@@ -35,31 +35,33 @@ class TwitterResponseProcessor {
 	}
 	
 	async process(response) {
-		let promises = [];
 		for(let tweet of response.data)
-			promises.push(this.process_tweet(tweet));
+			await this.process_tweet(tweet);
 		for(let user of response.includes.users)
-			promises.push(this.process_user(user));
-		if(response.includes.places instanceof Array)
-			promises.push(this.process_place(place));
-		
-		await Promise.all(promises);
+			await this.process_user(user);
+		if(response.includes.places instanceof Array) {
+			for(let place of response.includes.places)
+				await this.process_place(place);
+		}
 	}
 	
-	process_tweet(tweet) {
+	async process_tweet(tweet) {
 		if(tweet.public_metrics.reply_count > 0)
 			await write_safe(this.stream_tweets_with_replies, `${tweet.id}\n`);
 		this.anonymiser.anonymise_tweet(tweet);
 		await write_safe(this.stream_tweets, JSON.stringify(tweet));
+		await write_safe(this.stream_tweets, "\n");
 	}
 	
-	process_user(user) {
+	async process_user(user) {
 		this.anonymiser.anonymise_user(user);
 		await write_safe(this.stream_users, JSON.stringify(user));
+		await write_safe(this.stream_users, "\n");
 	}
 	
-	process_place(place) {
+	async process_place(place) {
 		await write_safe(this.stream_places, JSON.stringify(place));
+		await write_safe(this.stream_places, "\n");
 	}
 }
 

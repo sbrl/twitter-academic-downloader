@@ -6,5 +6,5 @@ export default function(cli) {
 		.argument("start-time", "The start time to start downloading tweets from", null, "date")
 		.argument("end-time", "Optional. The end time to finish downloading tweets at", null, "date")
 		.argument("credentials", "Path to a (TOML formatted) credentials file to use. See the README for more information on the format.")
-		.argument("output", "Path to the file to write the output to (default: stdout)");
+		.argument("output", "Path to the directory to write the output to", null, "string");
 }
