@@ -7,11 +7,9 @@ TODO: Switch `got` out for [`phin`](https://www.npmjs.com/package/phin) (it's *m
 
 
 ## Usage
+TODO: write usage here.
 
-
-Import environment variables:
-
- - `CONTACT_ADDR`: The contact email address sent in the user agent string to Twitter for informational/contact/abuse purposes. In the interests of being polite it is strongly suggested you set this.
+Don't forget about `post-process.sh` that needs to be run manually after the script finishes (recommend Windows users use the Windows Subsystem for Linux)
 
 
 ## Exit codes

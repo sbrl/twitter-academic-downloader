@@ -6,14 +6,22 @@ import fs from 'fs';
 import { write_safe, end_safe } from '../io/StreamHelpers.mjs';
 import TweetAnonymiser from '../tweets/TweetAnonymiser.mjs';
 
+// HACK: Make sure __dirname is defined when using es6 modules. I forget where I found this - a PR with a source URL would be great :D
+const __dirname = import.meta.url.slice(7, import.meta.url.lastIndexOf("/"));
+
 class TwitterResponseProcessor {
 	constructor(output_dir, anon_salt) {
 		this.output_dir = output_dir;
 		
 		this.anonymiser = new TweetAnonymiser(anon_salt);
 		
-		if(!fs.existsSync(output_dir))
+		if(!fs.existsSync(output_dir)) {
 			fs.mkdirSync(output_dir, { recursive: true, mode: 0o700 });
+			fs.copyFileSync(
+				path.join(__dirname, "post-process.sh"),
+				path.join(output_dir, "post-process.sh")
+			);
+		}
 		
 		this.stream_tweets = fs.createWriteStream(path.join(
 			output_dir,
@@ -43,6 +51,15 @@ class TwitterResponseProcessor {
 			for(let place of response.includes.places)
 				await this.process_place(place);
 		}
+	}
+	
+	async end() {
+		await Promise.all([
+			end_safe(this.stream_tweets),
+			end_safe(this.stream_users),
+			end_safe(this.stream_places),
+			end_safe(this.stream_tweets_with_replies),
+		]);
 	}
 	
 	async process_tweet(tweet) {

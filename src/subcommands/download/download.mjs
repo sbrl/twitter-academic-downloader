@@ -6,7 +6,6 @@ import path from 'path';
 import settings from '../../settings.mjs';
 
 import TweetDownloadManager from '../../lib/download/TweetDownloadManager.mjs';
-import { write_safe, end_safe } from '../../lib/io/StreamHelpers.mjs';
 
 export default async function () {
 	if(typeof settings.cli.search !== "string")
