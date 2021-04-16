@@ -83,6 +83,21 @@ class TweetDownloadManager {
 			// Update CLI
 			process.stdout.write(`[ ${(new Date()).toISOString()} ] ${totals.responses} API calls made; totals: ${totals.tweets} tweets, ${totals.users} users (non-unique), ${totals.places} places (non-unique); timings ${pretty_ms(time_api)} API, ${pretty_ms(time_process)} process \r`);
 		} while(next_token !== null);
+		
+		console.log();
+		l.log(`Complete, statistics:
+API requests:			${totals.responses}
+Tweets:					${totals.tweets}
+Users (non-unique):		${totals.users}
+Places (non-unique):	${totals.places}
+
+Please run the 'post-process.sh' script written to the output directory:
+
+	${dir_output}/post-process.sh ${dir_output}
+
+Thank you :-)
+`);
+		
 	}
 	
 	/**
@@ -134,8 +149,10 @@ class TweetDownloadManager {
 		
 		let response = await this.downloader.full_archive(params);
 		
-		if(response == null)
+		if(response == null) {
+			l.log(`Response was null, giving up`)
 			return this.sym_give_up;
+		}
 		
 		if(response.statusCode < 200 || response.statusCode >= 300) {
 			l.error("Encountered error when making Twitter API request");
