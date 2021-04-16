@@ -35,4 +35,6 @@ export default async function(credentials, path, get_params) {
 		l.error(`[download_json_twitter] Response text:`, response.body);
 		return null;
 	}
+	
+	return response;
 }
