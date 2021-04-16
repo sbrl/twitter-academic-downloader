@@ -20,3 +20,4 @@ Exit code	| Meaning
 ## Useful Links
  - `phin` (the HTTP client library we're using) docs: https://ethanent.github.io/phin/global.html
  - Twitter API full archive search reference: https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-all
+ - Twitter API building queries: https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query
