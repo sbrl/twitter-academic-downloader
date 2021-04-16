@@ -49,6 +49,8 @@ class TweetDownloadManager {
 		this.start_time = start_time;
 		this.end_time = end_time;
 		
+		query += " -is:retweet"; // Exclude retweets, ref https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query#boolean
+		
 		let next_token = null,
 			totals = { responses: 0, tweets: 0, users: 0, places: 0 };
 		do {
