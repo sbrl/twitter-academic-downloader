@@ -160,12 +160,18 @@ Thank you :-)
 			// Guarantee at least 1s between requests
 			await sleep_async(1 * 1000);
 			
+			if(typeof response.data == "undefined") {
+				l.warn(`Encountered undefined response (HTTP status code ${response.statusCode}), retrying`);
+				continue;
+			}
+			
 			if(response == this.sym_retry) continue;
 			if(response == this.sym_give_up) {
 				process.exit(3);
 			}
 			
 			next_token = response.meta.next_token || null;
+			
 			
 			// Metrics
 			this.totals.responses++;
