@@ -9,9 +9,15 @@ import TwitterApiCredentials from './TwitterApiCredentials.mjs';
 import AcademicTweetDownloader from './AcademicTweetDownloader.mjs';
 import TwitterResponseProcessor from './TwitterResponseProcessor.mjs';
 
+/**
+ * Manages the download of tweets from Twitter using Twitter's Academic API.
+ * @param	{string}	dir_output			The output directory to write the results to.
+ * @param	{boolean}	download_replies	Whether to also download replies to tweets. This is done by downloading all the tweets in the conversation id of a tweet if it has at least 1 reply.
+ */
 class TweetDownloadManager {
-	constructor(dir_output) {
+	constructor(dir_output, download_replies = true) {
 		this.dir_output = dir_output;
+		this.download_replies = download_replies;
 		
 		this.has_finished = false;
 		
@@ -20,10 +26,31 @@ class TweetDownloadManager {
 		this.end_time = null;
 		this.next_token = null;
 		
+		/**
+		 * The conversation ids we've seen so far.
+		 * This is a Map because we need to know whether a conversation id has been downloaded yet, rather than iterating through them.
+		 * @type {Map}
+		 */
+		this.seen_conversation_ids = new Map();
+		
 		this.sym_retry = Symbol.for("SYM_RETRY");
 		this.sym_give_up = Symbol.for("SYM_GIVE_UP");
+		
+		// The cumulative statistics
+		this.totals = {
+			responses: 0,		// The number of API responses processed
+			tweets: 0,			// The number of tweets downloaded
+			replies: 0,			// The number of conversations downloaded
+			users: 0,			// The number of users downloaded
+			places: 0			// The number of places downloaded
+		};
 	}
 	
+	/**
+	 * Initialises this TweetDownloadManager.
+	 * @param  {string}  filename_credentials The name of the file that contains the Twitter API credentials to use when making API requests.
+	 * @return {Promise}                      A promise that resolves when the setup process is complete.
+	 */
 	async setup(filename_credentials) {
 		this.credentials = await TwitterApiCredentials.Load(filename_credentials);
 		this.downloader = new AcademicTweetDownloader(this.credentials);
@@ -31,6 +58,7 @@ class TweetDownloadManager {
 			this.dir_output,
 			this.credentials.anonymise_salt
 		);
+		this.processor.on("tweet_with_reply", this.download_conversation.bind(this));
 		
 		let limiter = new Bottleneck({
 			minTime: 2000, // 1 request per second (but twitter doesn't like that very much)
@@ -45,14 +73,86 @@ class TweetDownloadManager {
 		
 	}
 	
+	/**
+	 * Downloads all the tweets associated with a given query.
+	 * The Twitter Academic API is used to do a full-archive search.
+	 * @param	{string}	query			The query string to search for. ` -is:retweet` is automatically appended to exclude retweets.
+	 * @param	{Date}		start_time		The start time to start looking for tweets at.
+	 * @param	{Date}		[end_time=null]	The end time to start looking for tweets at (default: the current time)
+	 * @return	{Promise}	A promise that resolves when the downloading process is complete.
+	 */
 	async download_archive(query, start_time, end_time = null) {
 		this.start_time = start_time;
 		this.end_time = end_time;
 		
+		let time_taken = new Date();
+		
+		await this.do_download_archive(query);
+		
+		time_taken = new Date() - time_taken;
+		
+		console.log();
+		l.log(`Complete, statistics:
+Time taken:				${pretty_ms(time_taken)}
+API requests:			${this.totals.responses}
+Tweets:					${this.totals.tweets}
+Replies:				${this.totals.replies}
+Users (non-unique):		${this.totals.users}
+Places (non-unique):	${this.totals.places}
+
+Please run the 'post-process.sh' script written to the output directory:
+
+	${this.dir_output}/post-process.sh ${this.dir_output}
+
+Thank you :-)
+`);
+	}
+	
+	/**
+	 * Downloads all the tweets associated with the given conversation id.
+	 * Does not download tweets from a conversation id more than once.
+	 * Tweets are written to the main output directory alongside all the other
+	 * tweets.
+	 * @param	{string}	conversation_id	The conversation id to download from.
+	 * @param	{number}	depth			The reply depth at which the conversation was found.
+	 * @return	{Promise}	A promise that resolves when the downloading is complete.
+	 */
+	async download_conversation(conversation_id) {
+		// console.log();
+		if(this.seen_conversation_ids.has(conversation_id)) {
+			// l.info(`Skipping conversation id because we've seen it before`);
+			return;
+		}
+		// l.info(`Downloading conversation replies`);
+		let time_taken = new Date();
+		
+		let count_replies = await this.do_download_archive(`conversation_id:${conversation_id}`);
+		this.totals.replies += count_replies;
+		
+		time_taken = new Date() - time_taken;
+		
+		// console.log();
+		// l.log(`Done in ${pretty_ms(time_taken)}, ${count_replies} replies downloaded`);
+	}
+	
+	/**
+	 * Performs the downloading of all the tweets matched by a given query.
+	 * All data downloaded is sent to the output directory determined at
+	 * initialisation.
+	 * Unlike .download_query(), this function doesn't take a start / end Date
+	 * objects - instead it uses the Date objects attached to the
+	 * TweetDownloadManager object as member variables.
+	 * @param	{string}		query	The query string to search for.
+	 * @return	{Promise}	A promise that resolves when the downloading process is complete.
+	 */
+	async do_download_archive(query) {
 		query += " -is:retweet"; // Exclude retweets, ref https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query#boolean
 		
-		let next_token = null,
-			totals = { responses: 0, tweets: 0, users: 0, places: 0 };
+		// Totals just for this run
+		// We could be downloading the tweets for a single conversation
+		let tweets = 0;
+		
+		let next_token = null;
 		do {
 			let time_api = new Date();
 			let response = await this.download_single_wrapped(query, next_token);
@@ -68,36 +168,24 @@ class TweetDownloadManager {
 			next_token = response.meta.next_token || null;
 			
 			// Metrics
-			totals.responses++;
-			totals.tweets += response.data.length;
+			this.totals.responses++;
+			this.totals.tweets += response.data.length;
+			tweets += response.data.length;
 			if(response.includes.users instanceof Array)
-				totals.users += response.includes.users.length;
+				this.totals.users += response.includes.users.length;
 			if(response.includes.places instanceof Array)
-				totals.places += response.includes.places.length;
+				this.totals.places += response.includes.places.length;
 			
 			
 			let time_process = new Date();
 			await this.processor.process(response);
 			time_process = new Date() - time_process;
 			
-			// Update CLI
-			process.stdout.write(`[ ${(new Date()).toISOString()} ] ${totals.responses} API calls made; totals: ${totals.tweets} tweets, ${totals.users} users (non-unique), ${totals.places} places (non-unique); timings ${pretty_ms(time_api)} API, ${pretty_ms(time_process)} process \r`);
+			// Update the CLI
+			process.stdout.write(`[ ${(new Date()).toISOString()} ] ${this.totals.responses} API calls made; totals: tweets ${this.totals.tweets} (${this.totals.replies} replies), ${this.totals.users} users, ${this.totals.places} places; timings ${pretty_ms(time_api)} API, ${pretty_ms(time_process)} process \r`);
 		} while(next_token !== null);
 		
-		console.log();
-		l.log(`Complete, statistics:
-API requests:			${totals.responses}
-Tweets:					${totals.tweets}
-Users (non-unique):		${totals.users}
-Places (non-unique):	${totals.places}
-
-Please run the 'post-process.sh' script written to the output directory:
-
-	${dir_output}/post-process.sh ${dir_output}
-
-Thank you :-)
-`);
-		
+		return tweets;
 	}
 	
 	/**

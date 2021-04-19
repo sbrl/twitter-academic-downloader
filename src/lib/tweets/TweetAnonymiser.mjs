@@ -65,22 +65,23 @@ class TweetAnonymiser {
 			}
 		}
 		
-		// Anonyise all mentions & convert to a list of strings instead
-		if(typeof tweet.entities.mentions === "object") {
-			let mentions = [];
-			for(let mention of tweet.entities.mentions) {
-				mentions.push(anonymise_hash(mention.username, this.salt));
-			}
-			tweet.entities.mentions = mentions;
-		}
 		
-		// Delete start & end indexes, because they could leak information about an @mention
 		if(typeof tweet.entities === "object") {
+			// Delete start & end indexes, because they could leak information about an @mention
 			for(let key in tweet.entities) {
 				for(let item in tweet.entities[key]) {
 					delete item.start;
 					delete item.end;
 				}
+			}
+			
+			// Anonyise all mentions & convert to a list of strings instead
+			if(typeof tweet.entities.mentions === "object") {
+				let mentions = [];
+				for(let mention of tweet.entities.mentions) {
+					mentions.push(anonymise_hash(mention.username, this.salt));
+				}
+				tweet.entities.mentions = mentions;
 			}
 		}
 	}

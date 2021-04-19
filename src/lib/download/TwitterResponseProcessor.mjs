@@ -1,5 +1,5 @@
 "use strict";
-
+import { EventEmitter } from 'events';
 import path from 'path';
 import fs from 'fs';
 
@@ -9,8 +9,10 @@ import TweetAnonymiser from '../tweets/TweetAnonymiser.mjs';
 // HACK: Make sure __dirname is defined when using es6 modules. I forget where I found this - a PR with a source URL would be great :D
 const __dirname = import.meta.url.slice(7, import.meta.url.lastIndexOf("/"));
 
-class TwitterResponseProcessor {
+class TwitterResponseProcessor extends EventEmitter {
 	constructor(output_dir, anon_salt) {
+		super();
+		
 		this.output_dir = output_dir;
 		
 		this.anonymiser = new TweetAnonymiser(anon_salt);
@@ -63,8 +65,10 @@ class TwitterResponseProcessor {
 	}
 	
 	async process_tweet(tweet) {
-		if(tweet.public_metrics.reply_count > 0)
+		if(tweet.public_metrics.reply_count > 0) {
+			this.emit("tweet_with_reply", tweet.id);
 			await write_safe(this.stream_tweets_with_replies, `${tweet.id}\n`);
+		}
 		this.anonymiser.anonymise_tweet(tweet);
 		await write_safe(this.stream_tweets, JSON.stringify(tweet));
 		await write_safe(this.stream_tweets, "\n");
