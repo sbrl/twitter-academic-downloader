@@ -1,6 +1,19 @@
 # PhD-Social-Media
 
-> Social media code for my PhD.
+> Twitter Academic API tweet downloader
+
+The project downloads tweets from twitter and saves them to ab output directory. It can:
+
+ - Anonymise all tweets downloaded (this is automatic can _cannot_ be disabled)
+ - Downloads all replies to tweets matched (optional)
+
+Note that the users and places are **not unique** until they are deduplicated by the post-processing script `post-process.sh` - more information about this in the [usage section below](#usage)
+
+## System Requirements
+ - Linux (Windows might work too, but is untested)
+ - [Node.js](https://nodejs.org/) (and `npm`, which is bundled automatically with Node.js)
+ - [`jq`](https://stedolan.github.io/jq/) (for post-processing tweets to deduplicate them)
+ - Bash (for running the post-processing script; Windows users may be able to use Git Bash)
 
 
 ## Usage
