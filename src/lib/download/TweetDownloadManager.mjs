@@ -18,6 +18,7 @@ class TweetDownloadManager {
 	constructor(dir_output, download_replies = true) {
 		this.dir_output = dir_output;
 		this.download_replies = download_replies;
+		this.max_retries = 3;
 		
 		this.has_finished = false;
 		
@@ -150,7 +151,7 @@ Thank you :-)
 		
 		// Totals just for this run
 		// We could be downloading the tweets for a single conversation
-		let tweets = 0;
+		let tweets = 0, retries = 0;
 		
 		let next_token = null;
 		do {
@@ -165,10 +166,14 @@ Thank you :-)
 				continue;
 			}
 			
-			if(response == this.sym_retry) continue;
-			if(response == this.sym_give_up) {
-				process.exit(3);
+			if(response == this.sym_retry) {
+				if(retries >= this.max_retries) {
+					l.warn(`Giving up after ${retries} retries`);
+					break;
+				}
+				continue;
 			}
+			if(response == this.sym_give_up) break;
 			
 			next_token = response.meta.next_token || null;
 			
