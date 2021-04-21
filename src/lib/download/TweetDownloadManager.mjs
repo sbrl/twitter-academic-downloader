@@ -15,10 +15,11 @@ import TwitterResponseProcessor from './TwitterResponseProcessor.mjs';
  * @param	{boolean}	download_replies	Whether to also download replies to tweets. This is done by downloading all the tweets in the conversation id of a tweet if it has at least 1 reply.
  */
 class TweetDownloadManager {
-	constructor(dir_output, download_replies = true) {
+	constructor(dir_output, download_replies = true, tweets_per_api_call = 50) {
 		this.dir_output = dir_output;
 		this.download_replies = download_replies;
 		this.max_retries = 3;
+		this.tweets_per_api_call = tweets_per_api_call;
 		
 		this.max_query_length = 1024;
 		
@@ -85,6 +86,9 @@ class TweetDownloadManager {
 	 * @return	{Promise}	A promise that resolves when the downloading process is complete.
 	 */
 	async download_archive(query, start_time, end_time = null) {
+		l.log(`${this.download_replies ? "Downloading" : "Not downloading"} replies.`);
+		l.log(`Downloading ${this.tweets_per_api_call} tweets per API call.`);
+		
 		this.start_time = start_time;
 		this.end_time = end_time;
 		
@@ -163,11 +167,6 @@ Thank you :-)
 			// Guarantee at least 1s between requests
 			await sleep_async(1 * 1000);
 			
-			if(typeof response.data == "undefined") {
-				l.warn(`Encountered undefined response (HTTP status code ${response.statusCode}), retrying`);
-				continue;
-			}
-			
 			if(response == this.sym_retry) {
 				if(retries >= this.max_retries) {
 					l.warn(`Giving up after ${retries} retries`);
@@ -211,7 +210,7 @@ Thank you :-)
 		let params = {
 			query: query,
 			start_time: this.start_time.toISOString(),
-			max_results: 50,
+			max_results: this.tweets_per_api_call,
 			"tweet.fields": [
 				"author_id",
 				"geo",
@@ -264,12 +263,17 @@ Thank you :-)
 				return this.sym_retry;
 			}
 		}
+		
+		if(response.body.meta.result_count == 0) {
+			// l.log(`No results found, giving up`);
+			return this.sym_give_up;
+		}
 		return response.body;
 	}
 }
 
-TweetDownloadManager.Create = async (filename_credentials, output) => {
-	let result = new TweetDownloadManager(output);
+TweetDownloadManager.Create = async (filename_credentials, output, download_replies, tweets_per_api_call) => {
+	let result = new TweetDownloadManager(output, download_replies, tweets_per_api_call);
 	await result.setup(filename_credentials);
 	return result;
 }

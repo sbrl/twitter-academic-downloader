@@ -18,10 +18,14 @@ export default async function () {
 		throw new Error(`Error: The credentials file at '${settings.cli.credentials}' doesn't exist. Have you checked the spelling and file permissions?`);
 	if(typeof settings.cli.output !== "string")
 		throw new Error(`Error: No output directory specified (try --output path/to/directory)`);
+	if(settings.cli.tweets_per_request < 10 || settings.cli.tweets_per_request > 500)
+		throw new Error(`Error: The twitter API only allows retrieving between 10 and 500 tweets per api call (you asked for ${settings.cli.tweets_per_request}).`);
 	
 	let downloader = await TweetDownloadManager.Create(
 		settings.cli.credentials,
-		settings.cli.output
+		settings.cli.output,
+		settings.cli.download_replies,
+		settings.cli.tweets_per_request
 	);
 	
 	await downloader.download_archive(
