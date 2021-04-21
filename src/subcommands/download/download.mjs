@@ -29,6 +29,7 @@ export default async function () {
 		settings.cli.download_replies,
 		settings.cli.tweets_per_request
 	);
+	downloader.query_max_length = settings.cli.max_query_length;
 	
 	await downloader.download_archive(
 		settings.cli.search,

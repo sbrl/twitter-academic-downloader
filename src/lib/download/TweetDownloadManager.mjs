@@ -8,6 +8,7 @@ import sleep_async from '../async/sleep_async.mjs';
 import TwitterApiCredentials from './TwitterApiCredentials.mjs';
 import AcademicTweetDownloader from './AcademicTweetDownloader.mjs';
 import TwitterResponseProcessor from './TwitterResponseProcessor.mjs';
+import ConversationIdsQueue from './ConversationIdsQueue.mjs';
 
 /**
  * Manages the download of tweets from Twitter using Twitter's Academic API.
@@ -21,7 +22,8 @@ class TweetDownloadManager {
 		this.max_retries = 3;
 		this.tweets_per_api_call = tweets_per_api_call;
 		
-		this.max_query_length = 1024;
+		this.query_max_length = 1024;
+		this.query_postfix = " -is:retweet";
 		
 		this.has_finished = false;
 		
@@ -36,6 +38,8 @@ class TweetDownloadManager {
 		 * @type {Map}
 		 */
 		this.seen_conversation_ids = new Map();
+		
+		this.conversation_id_queue = new ConversationIdsQueue(this.query_postfix, this.query_max_length);
 		
 		this.sym_retry = Symbol.for("SYM_RETRY");
 		this.sym_give_up = Symbol.for("SYM_GIVE_UP");
@@ -95,6 +99,8 @@ class TweetDownloadManager {
 		let time_taken = new Date();
 		
 		await this.do_download_archive(query);
+		// Finish up downloading the remaining replies
+		await this.download_conversation(null);
 		
 		time_taken = new Date() - time_taken;
 		
@@ -120,20 +126,32 @@ Thank you :-)
 	 * Does not download tweets from a conversation id more than once.
 	 * Tweets are written to the main output directory alongside all the other
 	 * tweets.
-	 * @param	{string}	conversation_id	The conversation id to download from.
+	 * @param	{string|null}	conversation_id	The conversation id to download from. If null, then we cleanup all remaining conversation ids from the queue.
 	 * @param	{number}	depth			The reply depth at which the conversation was found.
 	 * @return	{Promise}	A promise that resolves when the downloading is complete.
 	 */
 	async download_conversation(conversation_id) {
-		// console.log();
-		if(this.seen_conversation_ids.has(conversation_id)) {
-			// l.info(`Skipping conversation id because we've seen it before`);
-			return;
+		let query_string = null;
+		if(conversation_id !== null) {
+			// console.log();
+			if(this.seen_conversation_ids.has(conversation_id)) {
+				// l.info(`Skipping conversation id because we've seen it before`);
+				return;
+			}
+			
+			this.conversation_id_queue.push(conversation_id);
+			
+			query_string = this.conversation_id_queue.get_query(false);
 		}
+		else
+			query_string = this.conversation_id_queue.get_query(true);
+		
+		if(query_string == null) return; // Not enough yet to make an API call
+		
 		// l.info(`Downloading conversation replies`);
 		let time_taken = new Date();
 		
-		let count_replies = await this.do_download_archive(`conversation_id:${conversation_id}`);
+		let count_replies = await this.do_download_archive(query_string, true);
 		this.totals.replies += count_replies;
 		
 		time_taken = new Date() - time_taken;
@@ -149,11 +167,12 @@ Thank you :-)
 	 * Unlike .download_query(), this function doesn't take a start / end Date
 	 * objects - instead it uses the Date objects attached to the
 	 * TweetDownloadManager object as member variables.
-	 * @param	{string}		query	The query string to search for.
+	 * @param	{string}	query		The query string to search for.
+	 * @param	{boolean}	has_postfix	Whether the given querys tring already has the psotfix appended (i.e. -is:retweet) or not. Used in the conversation ids batching system.
 	 * @return	{Promise}	A promise that resolves when the downloading process is complete.
 	 */
-	async do_download_archive(query) {
-		query += " -is:retweet"; // Exclude retweets, ref https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query#boolean
+	async do_download_archive(query, has_postfix = false) {
+		if(!has_postfix) query += this.query_postfix; // Exclude retweets, ref https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query#boolean
 		
 		// Totals just for this run
 		// We could be downloading the tweets for a single conversation

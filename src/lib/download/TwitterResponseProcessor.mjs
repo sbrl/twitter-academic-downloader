@@ -69,7 +69,7 @@ class TwitterResponseProcessor extends EventEmitter {
 		if(tweet.public_metrics.reply_count > 0) {
 			// l.log(`Tweet id ${tweet.id} has metrics`, tweet.public_metrics);
 			this.emit("tweet_with_reply", tweet.id);
-			await write_safe(this.stream_tweets_with_replies, `${tweet.id}\n`);
+			// await write_safe(this.stream_tweets_with_replies, `${tweet.id}\n`);
 		}
 		this.anonymiser.anonymise_tweet(tweet);
 		await write_safe(this.stream_tweets, JSON.stringify(tweet));
