@@ -20,6 +20,8 @@ class TweetDownloadManager {
 		this.download_replies = download_replies;
 		this.max_retries = 3;
 		
+		this.max_query_length = 1024;
+		
 		this.has_finished = false;
 		
 		this.query = null;
