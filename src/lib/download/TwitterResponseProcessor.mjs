@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import path from 'path';
 import fs from 'fs';
 
+import l from '../io/Log.mjs';
 import { write_safe, end_safe } from '../io/StreamHelpers.mjs';
 import TweetAnonymiser from '../tweets/TweetAnonymiser.mjs';
 
@@ -66,6 +67,7 @@ class TwitterResponseProcessor extends EventEmitter {
 	
 	async process_tweet(tweet) {
 		if(tweet.public_metrics.reply_count > 0) {
+			// l.log(`Tweet id ${tweet.id} has metrics`, tweet.public_metrics);
 			this.emit("tweet_with_reply", tweet.id);
 			await write_safe(this.stream_tweets_with_replies, `${tweet.id}\n`);
 		}

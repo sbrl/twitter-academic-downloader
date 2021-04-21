@@ -30,6 +30,20 @@ Exit code	| Meaning
 1			| General error
 3			| Gave up downloading more tweets because of an error parsing a response Twitter sent us
 
+
+## Analysing the data
+
+### Plot a frequency graph
+Run the following command:
+
+```bash
+cat tweets.jsonl | jq --raw-output .created_at | awk 'BEGIN { FS="T" } { print $1 }' | sort | uniq -c | sed -e 's/\s\s*/ /g' -e 's/^\s//g' | tr ' ' '\t' >frequencies.tsv
+```
+
+...replacing `tweets.jsonl` and `frequencies.tsv` with the input and output files respectively.
+
+Then, open the resulting file in your favourite editor (e.g. Libreoffice Calc) to plot the graph (swap the columns around).
+
 ## Useful Links
  - `phin` (the HTTP client library we're using) docs: https://ethanent.github.io/phin/global.html
  - Twitter API full archive search reference: https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-all

@@ -25,13 +25,21 @@ export default async function(credentials, path, get_params) {
 			"user-agent": `AcademicTweetDownloader/${version} (Node.js/${process.version}; ${os.platform()} ${os.arch()}; ${credentials.contact_address}) dynamic-flood-mapping`
 		}
 	});
+	// If it's a buffer, convert it to a string
+	if (response.body instanceof Buffer)
+		response.body = response.body.toString("utf-8");
+	
 	try {
 		response.body = JSON.parse(response.body);
 	}
 	catch(error) {
+		// It might be a 429
+		if(response.statusCode < 200 || response.statusCode >= 300)
+			return response;
 		l.error(`[download_json_twitter] Failed to parse response as JSON.`);
+		l.error(`[download_json_twitter] Response:`, response);
 		l.error(`[download_json_twitter] URL:`, url);
-		l.error(`[download_json_twitter] Status code:`, response.statusCode, "headers:", response.getHeaders());
+		l.error(`[download_json_twitter] Status code:`, response.statusCode);
 		l.error(`[download_json_twitter] Response text:`, response.body);
 		return null;
 	}
