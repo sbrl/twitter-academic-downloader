@@ -19,6 +19,10 @@ Note that the users and places are **not unique** until they are deduplicated by
 ## Usage
 TODO: write usage here.
 
+
+ - `--max-query-length`: This is used to batch the download of replies.
+
+
 Don't forget about `post-process.sh` that needs to be run manually after the script finishes (recommend Windows users use the Windows Subsystem for Linux)
 
 

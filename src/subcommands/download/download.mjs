@@ -20,6 +20,8 @@ export default async function () {
 		throw new Error(`Error: No output directory specified (try --output path/to/directory)`);
 	if(settings.cli.tweets_per_request < 10 || settings.cli.tweets_per_request > 500)
 		throw new Error(`Error: The twitter API only allows retrieving between 10 and 500 tweets per api call (you asked for ${settings.cli.tweets_per_request}).`);
+	if(settings.cli.max_query_length <= 0)
+		throw new Error(`Error: Invalid max query length ${settings.cli.tweets_per_request} - the value must be a positive integer.`);
 	
 	let downloader = await TweetDownloadManager.Create(
 		settings.cli.credentials,
