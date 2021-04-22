@@ -33,7 +33,7 @@ class ConversationIdsQueue {
 			
 			let query = this._make_query(parts);
 			// We made it too long
-			if(query.length > query_max_length) {
+			if(query.length > this.query_max_length) {
 				// Delete the items from the queue
 				this._queue.splice(0, i); // i starts at 0, not 1
 				return query_prev;

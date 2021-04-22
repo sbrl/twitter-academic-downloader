@@ -23,7 +23,7 @@ class TweetDownloadManager {
 		this.tweets_per_api_call = tweets_per_api_call;
 		
 		this.query_max_length = 1024;
-		this.query_postfix = " -is:retweet";
+		this.query_postfix = "-is:retweet";
 		
 		this.has_finished = false;
 		
@@ -172,7 +172,7 @@ Thank you :-)
 	 * @return	{Promise}	A promise that resolves when the downloading process is complete.
 	 */
 	async do_download_archive(query, has_postfix = false) {
-		if(!has_postfix) query += this.query_postfix; // Exclude retweets, ref https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query#boolean
+		if(!has_postfix) query += ` ${this.query_postfix}`; // Exclude retweets, ref https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query#boolean
 		
 		// Totals just for this run
 		// We could be downloading the tweets for a single conversation
