@@ -25,6 +25,8 @@ export default async function(credentials, path, get_params) {
 			"user-agent": `AcademicTweetDownloader/${version} (Node.js/${process.version}; ${os.platform()} ${os.arch()}; ${credentials.contact_address}) dynamic-flood-mapping`
 		}
 	});
+	l.debug(`[DEBUG:download_json_twitter] GET ${response.statusCode} ${url}`);
+	
 	// If it's a buffer, convert it to a string
 	if (response.body instanceof Buffer)
 		response.body = response.body.toString("utf-8");

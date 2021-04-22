@@ -138,7 +138,6 @@ Thank you :-)
 				// l.info(`Skipping conversation id because we've seen it before`);
 				return;
 			}
-			
 			this.conversation_id_queue.push(conversation_id);
 			
 			query_string = this.conversation_id_queue.get_query(false);
@@ -146,7 +145,7 @@ Thank you :-)
 		else
 			query_string = this.conversation_id_queue.get_query(true);
 		
-		if(query_string == null) return; // Not enough yet to make an API call
+		if(query_string === null) return; // Not enough yet to make an API call
 		
 		// l.info(`Downloading conversation replies`);
 		let time_taken = new Date();
@@ -156,8 +155,7 @@ Thank you :-)
 		
 		time_taken = new Date() - time_taken;
 		
-		// console.log();
-		// l.log(`Done in ${pretty_ms(time_taken)}, ${count_replies} replies downloaded`);
+		l.log(`Done in ${pretty_ms(time_taken)}, ${count_replies} replies downloaded`);
 	}
 	
 	/**
@@ -213,7 +211,7 @@ Thank you :-)
 			time_process = new Date() - time_process;
 			
 			// Update the CLI
-			process.stdout.write(`[ ${(new Date()).toISOString()} ] ${this.totals.responses} API calls made; totals: tweets ${this.totals.tweets} (${this.totals.replies} replies), ${this.totals.users} users, ${this.totals.places} places; timings ${pretty_ms(time_api)} API, ${pretty_ms(time_process)} process \r`);
+			process.stdout.write(`[ ${(new Date()).toISOString()} ] ${this.totals.responses} API calls made; totals: tweets ${this.totals.tweets} (${this.totals.replies} replies), ${this.totals.users} users, ${this.totals.places} places; timings ${pretty_ms(time_api)} API, ${pretty_ms(time_process)} process \n`);
 		} while(next_token !== null);
 		
 		return tweets;
