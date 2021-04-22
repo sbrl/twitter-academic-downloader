@@ -281,6 +281,10 @@ Thank you :-)
 				await sleep_async(60 * 1000);
 				return this.sym_retry;
 			}
+			if(response.statusCode >= 500 && response.statusCode < 600) {
+				l.error(`Server error (http status code ${response.statusCode}), backing off for 5 minutes`);
+				await sleep_async(60 * 1000 * 5);
+			}
 		}
 		
 		if(response.body.meta.result_count == 0) {
