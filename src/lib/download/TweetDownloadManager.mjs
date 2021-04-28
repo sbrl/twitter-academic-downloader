@@ -287,7 +287,7 @@ Thank you :-)
 			return this.sym_retry;
 		}
 		
-		if(typeof response.body.meta !== object || response.body.meta.result_count == 0) {
+		if(typeof response.body.meta !== "object" || response.body.meta.result_count == 0) {
 			// l.log(`No results found, giving up`);
 			return this.sym_give_up;
 		}
