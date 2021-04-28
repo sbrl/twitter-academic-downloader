@@ -277,15 +277,17 @@ Thank you :-)
 			if(response.statusCode == 429) {
 				l.error("Too many requests response detected, waiting 1 minute");
 				await sleep_async(60 * 1000);
-				return this.sym_retry;
 			}
 			if(response.statusCode >= 500 && response.statusCode < 600) {
 				l.error(`Server error (http status code ${response.statusCode}), backing off for 5 minutes`);
 				await sleep_async(60 * 1000 * 5);
 			}
+			
+			// Default to retrying if something went wrong
+			return this.sym_retry;
 		}
 		
-		if(response.body.meta.result_count == 0) {
+		if(typeof response.body.meta !== object || response.body.meta.result_count == 0) {
 			// l.log(`No results found, giving up`);
 			return this.sym_give_up;
 		}
