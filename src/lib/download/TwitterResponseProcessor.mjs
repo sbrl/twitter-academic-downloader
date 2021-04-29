@@ -38,11 +38,11 @@ class TwitterResponseProcessor extends EventEmitter {
 			output_dir,
 			"places.jsonl"
 		));
-		
-		this.stream_tweets_with_replies = fs.createWriteStream(path.join(
-			output_dir,
-			"conversation_ids_with_replies.txt"
-		));
+		// 
+		// this.stream_tweets_with_replies = fs.createWriteStream(path.join(
+		// 	output_dir,
+		// 	"conversation_ids_with_replies.txt"
+		// ));
 	}
 	
 	async process(response) {
@@ -61,7 +61,7 @@ class TwitterResponseProcessor extends EventEmitter {
 			end_safe(this.stream_tweets),
 			end_safe(this.stream_users),
 			end_safe(this.stream_places),
-			end_safe(this.stream_tweets_with_replies),
+			// end_safe(this.stream_tweets_with_replies),
 		]);
 	}
 	
