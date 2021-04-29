@@ -260,7 +260,7 @@ Thank you :-)
 		};
 		// l.log(`[TweetDownloadManager:download_single] params`, params);
 		if(this.end_time !== null)
-			params.end_time = this.end_time;
+			params.end_time = this.end_time.toISOString();
 		if(next_token !== null)
 			params.next_token = next_token;
 		
