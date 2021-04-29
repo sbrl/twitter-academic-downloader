@@ -1,24 +1,95 @@
-# PhD-Social-Media
+# twitter-academic-downloader
 
 > Twitter Academic API tweet downloader
 
-The project downloads tweets from twitter and saves them to ab output directory. It can:
+This command-line program downloads tweets from twitter using the academic full-archive search endpoint and saves them to an output directory. It can:
 
  - Anonymise all tweets downloaded (this is automatic can _cannot_ be disabled)
  - Downloads all replies to tweets matched (optional)
 
 Note that the users and places are **not unique** until they are deduplicated by the post-processing script `post-process.sh` - more information about this in the [usage section below](#usage)
 
+
 ## System Requirements
- - Linux (Windows might work too, but is untested)
+ - Linux (Windows might work too, but is untested and the following usage guide is written with Linux users in mind)
  - [Node.js](https://nodejs.org/) (and `npm`, which is bundled automatically with Node.js)
  - [`jq`](https://stedolan.github.io/jq/) (for post-processing tweets to deduplicate them)
  - Bash (for running the post-processing script; Windows users may be able to use Git Bash)
 
+Also, basic Linux command-line experience is required. I have a list of links in the following blog post that might be helpful to learn this:
+
+[Learn your terminal (or command line)](https://starbeamrainbowlabs.com/blog/article.php?article=posts/242-Learn-Your-Terminal.html)
+
 
 ## Usage
-TODO: write usage here.
+First, install using npm:
 
+```bash
+npm install twitter-academic-downloader
+```
+
+Then, you need to obtain the API credentials. To do this, you need to first apply to Twitter for Academic access. Do that here: <https://developer.twitter.com/en/portal/products/academic>
+
+Once you have access approved, create a project and app here: <https://developer.twitter.com/en/portal/projects-and-apps>
+
+This will give you 3 things:
+
+ - An API key
+ - An API secret key
+ - A bearer token
+
+Store all 3 of these securely. It is recommended that you use a password manager such as [Keepass](https://keepass.info/), [Bitwarden](https://bitwarden.com/), or similar.
+
+Then, you need to create a credentials file for `twitter-academic-downloader` to read. Currently twitter-academic-downloader only uses the bearer token. Such a configuration file is written in [TOML](https://toml.io/en/).
+
+Linux users can create the file securely like so:
+
+```bash
+touch credentials.toml
+chmod 0700 credentials.toml
+```
+
+By creating the the file and applying permissions to it _before_ putting private information in the file, it is more secure. Open the file for editing, and paste in the following:
+
+```toml
+bearer_token = "BEARER_TOKEN_HERE"
+
+# This can be any string, but must include either a URL or an email address. For example:
+#contact_address = "Bob's research program about rockets; contact: <bob@bobsrockets.com>"s
+contact_address = "CONTACT_ADDRESS_HERE"
+
+# An unpredictable string that's used to anonymise downloaded data.
+# For example, given the same salt the same username will be anonymised to the
+# same string every time, allowing for datasets to be built through multiple
+# runs of this program on differetn occasions. Once the downloading of a
+# dataset is complete, this string should be destroyed for security.
+# It is suggested that the string be at least 32 characters long. 
+# random.org is a good place to get randomness from if you're not on Linux:
+# https://www.random.org/strings/?num=10&len=10&digits=on&upperalpha=on&loweralpha=on&unique=on&format=plain&rnd=new
+# Alternatively on Linux execute this:
+# 	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '+/='
+anonymise_salt = "SALT_HERE"
+```
+
+There are 3 properties here that need changing.
+
+ - `BEARER_TOKEN_HERE` needs replacing with the bearer token you obtained from Twitter earlier.
+ - `CONTACT_ADDRESS_HERE` needs replacing with some kind of contact details. Be  it an email or website address. This is sent in all requests in the [user agent string](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent) to be polite. Alternatively, this can be omitted and the `CONTACT_ADDRESS` environment variable set instead.
+ - `SALT_HERE` needs replacing with a long, random, and unguessable string. This Bash command can generate an appropriate one: `dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '+/='`. Alternatively, [random.org can be used instead](https://www.random.org/passwords/?num=1&len=24&format=html&rnd=new). See the [section on data anonymisation](#section-on-data-anonymisation) for more information.
+
+Once done, you can download data from Twitter like so:
+
+```bash
+twitter-academic-downloader download --credentials path/to/credentials.toml --output path/to/output_dir --start-time '2019-01-01 01:00' --search 'insert query here'
+```
+
+Let's break down the above piece by piece:
+
+ - `twitter-academic-downloader`: This is the name of the command we want to call. In this case, we are calling the `twitter-academic-downloader`.
+ - `download`: This is the subcommand we are calling. In this case, we are calling the `download` subcommand.
+ - `--credentials path/to/credentials.toml` This specifies the location of the credentialsl file we created earlier. Replace `path/to/credentials.toml` with the path to your `credentials.toml` file.
+ - `--output path/to/output_dir` The path to the output directory to which the downloaded data will be written. Replace `path/to/output_dir` with the path to the output directory you'd like to download the data to. It will be created if it doesn't already exist.
+ - `--start-time '2019-01-01 01:00'` Specifies the start time to look for tweets. The Twitter academic API requires that a start time be specified when downloading tweets from the full archive search endpoint.
 
  - `--max-query-length`: This is used to batch the download of replies.
 
