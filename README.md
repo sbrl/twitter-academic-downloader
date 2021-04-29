@@ -144,6 +144,10 @@ cat tweets.jsonl | jq --raw-output .created_at | awk 'BEGIN { FS="T" } { print $
 
 Then, open the resulting file in your favourite editor (e.g. Libreoffice Calc) to plot the graph (swap the columns around).
 
+### Various useful `jq` things
+
+ - Filter by English tweets: `select(.lang == "en")`
+
 
 ## Useful Links
  - `phin` (the HTTP client library we're using) docs: https://ethanent.github.io/phin/global.html
