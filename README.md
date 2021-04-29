@@ -149,6 +149,16 @@ Then, open the resulting file in your favourite editor (e.g. Libreoffice Calc) t
  - Filter by English tweets: `select(.lang == "en")`
 
 
+### List all emojis
+Extracting emojis is a complex task. The following will extract all emojis, and return a ranked list of how many instances were found thereof:
+
+```bash
+jq --raw-output '.text' <tweets-all.jsonl | sed -e 's/[][{}()"+|&^\/@#?!_:;*’“”[:alnum:][:space:][:blank:]….:'"'"',=–‘%&$⁰7£¥€₹½²₂³⁶℃㏄℅™¤❝❞¡§©®»\x{00A0}\x{1680}\x{180E}\x{2000}\x{2001}\x{2002}\x{2003}\x{2004}\x{2005}\x{2006}\x{2007}\x{2008}\x{2009}\x{200A}\x{200B}\x{200C}\x{200D}\x{2028}\x{2029}\x{202F}\x{205F}\x{2060}\x{3000}\x{FEFF}\r«—~-]//g' -e '/^$/d' -e 's/./\0\n/g' | sort | uniq -c | sort -nr
+```
+
+Note that this isn't perfect - some manual cleaning will be required, as even the [wikipedia list of whitespace characters](https://en.wikipedia.org/wiki/Whitespace_character) appears to be incomplete O.o
+
+
 ## Useful Links
  - `phin` (the HTTP client library we're using) docs: https://ethanent.github.io/phin/global.html
  - Twitter API full archive search reference: https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-all
