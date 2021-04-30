@@ -56,7 +56,7 @@ class TweetAnonymiser {
 		tweet.conversation_id = anonymise_hash(tweet.conversation_id, this.salt);
 		tweet.author_id = anonymise_hash(tweet.author_id, this.salt);
 		tweet.created_at = this.round_date(tweet.created_at).toISOString();
-		tweet.text = tweet.text.replace(/@(\S+)/, (_, username) => `@${anonymise_hash(username, this.salt)}`);
+		tweet.text = tweet.text.replace(/@(\S+)/g, (_, username) => `@${anonymise_hash(username, this.salt)}`);
 		
 		// Anonymise any referenced tweets data
 		if(typeof tweet.referenced_tweets === "object") {
