@@ -20,6 +20,9 @@
 		"tensorflow.js",
 		"twitter"
 	],
+	"files": [
+		"src/"
+	],
 	"author": "Starbeamrainbowlabs",
 	"license": "MPL-2.0",
 	"dependencies": {
