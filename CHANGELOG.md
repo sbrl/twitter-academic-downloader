@@ -9,7 +9,7 @@ Release template text:
 Install or update from npm:
 
 ```bash
-npm install --save terrain50
+npm install --save twitter-academic-downloader
 ```
 
 -----
