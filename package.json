@@ -1,6 +1,6 @@
 {
 	"name": "phd-social-media",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"description": "Social Media analysis for dynamic mapping of floods",
 	"main": "src/index.mjs",
 	"bin": {
