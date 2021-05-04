@@ -11,7 +11,8 @@ Note that the users and places are **not unique** until they are deduplicated by
 
  - **Current version:** ![current npm version - see the GitHub releases](https://img.shields.io/npm/v/twitter-academic-downloader)
  - **Changelog:** https://github.com/sbrl/twitter-academic-downloader/blob/master/CHANGELOG.md
-
+ 
+<!-- Original package.json description: Social Media analysis for the dynamic mapping of floods -->
 
 ## System Requirements
  - Linux (Windows might work too, but is untested and the following usage guide is written with Linux users in mind)
