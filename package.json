@@ -1,7 +1,7 @@
 {
-	"name": "phd-social-media",
-	"version": "0.0.1",
-	"description": "Social Media analysis for dynamic mapping of floods",
+	"name": "twitter-academic-downloader",
+	"version": "1.0.0",
+	"description": "Anonymising tweet downloader that uses the Twitter Academic API full-archive search",
 	"main": "src/index.mjs",
 	"bin": {
 		"twitter-academic-downloader": "src/index.mjs"
@@ -19,6 +19,9 @@
 		"ai",
 		"tensorflow.js",
 		"twitter"
+	],
+	"files": [
+		"src/"
 	],
 	"author": "Starbeamrainbowlabs",
 	"license": "MPL-2.0",

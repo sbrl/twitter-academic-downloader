@@ -65,7 +65,20 @@ class TwitterResponseProcessor extends EventEmitter {
 		]);
 	}
 	
+	/**
+	 * Determines whether we actually want to keep the specified tweet or not.
+	 * @param	{Object}		tweet	The tweet to operate on.
+	 * @return	{Boolean}	Whether this tweet should be kept or not. true = keep, false = discard
+	 */
+	filter_tweet(tweet) {
+		if(tweet.text.match(/^RE\s+[^\s]/)) return false;
+		
+		return true;
+	}
+	
 	async process_tweet(tweet) {
+		if(!this.filter_tweet(tweet)) return;
+		
 		if(tweet.public_metrics.reply_count > 0) {
 			// l.log(`Tweet id ${tweet.id} has metrics`, tweet.public_metrics);
 			this.emit("tweet_with_reply", tweet.id);
