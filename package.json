@@ -26,6 +26,7 @@
 		"@ltd/j-toml": "^1.6.0",
 		"applause-cli": "^1.7.0",
 		"bottleneck": "^2.19.5",
+		"nexline": "^1.2.2",
 		"phin": "^3.5.1",
 		"pretty-ms": "^7.0.1"
 	}
