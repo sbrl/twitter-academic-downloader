@@ -24,6 +24,20 @@ Also, basic Linux command-line experience is required. I have a list of links in
 
 [Learn your terminal (or command line)](https://starbeamrainbowlabs.com/blog/article.php?article=posts/242-Learn-Your-Terminal.html)
 
+On apt-based systems such as Debian and Ubuntu, do this to install dependencies:
+
+```bash
+sudo apt install jq curl
+```
+
+Then, to install Node.js if you don't have it already you can use the [Node Version Manager](https://github.com/nvm-sh/nvm):
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+exec bash
+nvm install node
+```
+
 
 ## Usage
 First, install using npm:
