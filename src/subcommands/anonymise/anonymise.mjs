@@ -13,8 +13,6 @@ import TwitterApiCredentials from '../../lib/download/TwitterApiCredentials.mjs'
 import TweetAnonymiser from '../../lib/tweets/TweetAnonymiser.mjs';
 import { write_safe, end_safe } from '../../lib/io/StreamHelpers.mjs';
 
-import anonymise_hash from '../../lib/formatters/anonymise_hash.mjs';
-
 export default async function () {
 	if(typeof settings.cli.input !== "string")
 		throw new Error(`Error: No input file specified (try --input path/to/tweets.jsonl)`);
@@ -57,9 +55,6 @@ export default async function () {
 		
 		let obj = JSON.parse(line);
 		
-		let j = 0;
-		obj.text = obj.text.replace(/@(\S+)/g, (_, username) => !j++ ? username : `@${anonymise_hash(username, credentials.anonymise_salt)}`);
-		/*
 		switch(settings.cli.type) {
 			case "tweet":
 				anonymiser.anonymise_tweet(obj);
@@ -68,7 +63,6 @@ export default async function () {
 				anonymiser.anonymise_user(obj);
 				break;
 		}
-		*/
 		
 		await write_safe(writer, `${JSON.stringify(obj)}\n`);
 		
