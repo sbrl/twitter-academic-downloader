@@ -5,7 +5,7 @@ import anonymise_hash from '../formatters/anonymise_hash.mjs';
 class TweetAnonymiser {
 	constructor(salt) {
 		if(typeof salt !== "string")
-			throw new Error(`[TweetAnonymiser] Error: No salt specified.`);
+			throw new Error(`[TweetAnonymiser] Error: No salt specified (expected string, got ${typeof salt}).`);
 		
 		this.salt = salt;
 	}
@@ -79,7 +79,9 @@ class TweetAnonymiser {
 			if(typeof tweet.entities.mentions === "object") {
 				let mentions = [];
 				for(let mention of tweet.entities.mentions) {
-					mentions.push(anonymise_hash(mention.username, this.salt));
+					if(typeof mention == "string") mentions.push(mention);
+					else
+						mentions.push(anonymise_hash(mention.username, this.salt));
 				}
 				tweet.entities.mentions = mentions;
 			}

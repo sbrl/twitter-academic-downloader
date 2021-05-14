@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 import nexline from 'nexline';
-import pretty_ms from 'pretty_ms';
+import pretty_ms from 'pretty-ms';
 
 import l from '../../lib/io/Log.mjs';
 import settings from '../../settings.mjs';
@@ -30,7 +30,7 @@ export default async function () {
 	let credentials = await TwitterApiCredentials.Load(settings.cli.credentials);
 	
 	let anonymiser = new TweetAnonymiser(
-		credentials
+		credentials.anonymise_salt
 	);
 	
 	let basename = path.basename(settings.cli.input);
@@ -38,7 +38,7 @@ export default async function () {
 	let ext = basename_match == null ? "" : basename_match[1];
 	let target_filepath = path.join(
 		path.dirname(settings.cli.input),
-		`${basename.substr(basename_match.index)}-anonymised.${ext}`
+		`${basename.substr(0, basename_match.index)}-anonymised.${ext}`
 	);
 	l.log(`Writing to '${target_filepath}'`);
 	
@@ -50,7 +50,7 @@ export default async function () {
 	let i = 0, time = new Date();
 	while(true) {
 		let line = await reader.next();
-		if(line == null) break;
+		if(line == null || line.length == 0) break;
 		i++;
 		
 		let obj = JSON.parse(line);
@@ -65,10 +65,12 @@ export default async function () {
 		}
 		
 		await write_safe(writer, `${JSON.stringify(obj)}\n`);
+		
+		if(i % 1000 == 0) process.stdout.write(`\rAnonymising tweets: ${i}...`)
 	}
 	await end_safe(writer);
 	
 	time = new Date() - time;
 	
-	l.log(`${i} ${settings.cli.type}s anonymised in ${pretty_ms(time)}`);
+	console.log(`done, ${i} ${settings.cli.type}s anonymised in ${pretty_ms(time)} (~${(i / time * 1000).toFixed(0)} tweets / sec)`);
 }
