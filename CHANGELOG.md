@@ -15,6 +15,10 @@ npm install --save twitter-academic-downloader
 -----
 
 
+## v1.1
+ - Update broken URLs in README & package.json
+ - Also download attached media data
+
 
 ## v1.0
  - Initial release!
