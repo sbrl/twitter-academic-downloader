@@ -242,7 +242,8 @@ Thank you :-)
 			].join(","),
 			expansions: [
 				"author_id",
-				"geo.place_id"
+				"geo.place_id",
+				"attachments.media_keys"
 			].join(","),
 			"user.fields": [
 				"username",
