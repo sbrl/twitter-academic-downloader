@@ -11,7 +11,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://git.starbeamrainbowlabs.com/sbrl/PhD-Social-Media"
+		"url": "https://github.com/sbrl/twitter-academic-downloader.git"
 	},
 	"keywords": [
 		"social",

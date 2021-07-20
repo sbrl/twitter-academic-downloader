@@ -10,7 +10,7 @@ This command-line program downloads tweets from twitter using the academic full-
 Note that the users and places are **not unique** until they are deduplicated by the post-processing script `post-process.sh` - more information about this in the [usage section below](#usage)
 
  - **Current version:** ![current npm version - see the GitHub releases](https://img.shields.io/npm/v/twitter-academic-downloader)
- - **Changelog:** https://github.com/sbrl/twitter-academic-downloader/blob/master/CHANGELOG.md
+ - **Changelog:** https://github.com/sbrl/twitter-academic-downloader/blob/main/CHANGELOG.md
  
 <!-- Original package.json description: Social Media analysis for the dynamic mapping of floods -->
 
