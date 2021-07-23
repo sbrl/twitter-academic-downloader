@@ -238,7 +238,8 @@ Thank you :-)
 				"source",
 				"conversation_id",
 				"referenced_tweets",
-				"public_metrics"
+				"public_metrics",
+				"attachments"
 			].join(","),
 			expansions: [
 				"author_id",
