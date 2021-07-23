@@ -86,6 +86,15 @@ class TweetAnonymiser {
 				tweet.entities.mentions = mentions;
 			}
 		}
+		
+		if(tweet.media instanceof Array) {
+			for(let item of tweet.media)
+				this.anonymise_media_item(item);
+		}
+	}
+	
+	anonymise_media_item(media_item) {
+		media_item.media_key = anonymise_hash(media_item.media_key, this.salt);
 	}
 	
 	anonymise_user(user) {

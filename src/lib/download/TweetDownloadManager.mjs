@@ -258,6 +258,9 @@ Thank you :-)
 				"geo",
 				"id",
 				"place_type",
+			].join(","),
+			"media.fields": [
+				"url", "type", "public_metrics"
 			].join(",")
 		};
 		// l.log(`[TweetDownloadManager:download_single] params`, params);

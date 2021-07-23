@@ -46,8 +46,31 @@ class TwitterResponseProcessor extends EventEmitter {
 	}
 	
 	async process(response) {
-		for(let tweet of response.data)
+		// console.log(response.includes)
+		let media_map = new Map();
+		if(typeof response.includes !== "undefined"
+			&& response.includes.media instanceof Array
+			&& response.includes.media.length > 0) {
+			media_map = this.media_map(response.includes.media);
+		}
+		
+		for(let tweet of response.data) {
+			if(this.tweet_has_media(tweet)) {
+				tweet.media = [];
+				for(let media_key of tweet.attachments.media_keys) {
+					let media_def = media_map.get(media_key);
+					if(typeof media_def !== "object") {
+						l.warn(`Warning: media_key ${media_key} not found in media key map`);
+						continue;
+					}
+					tweet.media.push(media_def);
+				}
+				
+				delete tweet.attachments.media_keys;
+			}
 			await this.process_tweet(tweet);
+		}
+		
 		for(let user of response.includes.users)
 			await this.process_user(user);
 		if(response.includes.places instanceof Array) {
@@ -74,6 +97,25 @@ class TwitterResponseProcessor extends EventEmitter {
 		if(tweet.text.match(/^RE\s+[^\s]/)) return false;
 		
 		return true;
+	}
+	
+	media_map(media) {
+		let media_map = new Map();
+		for(let item of media) {
+			media_map.set(item.media_key, item);
+		}
+		return media_map;
+	}
+	
+	/**
+	 * Determines whether the given tweet has any attached media or not.
+	 * @param	{Object}		tweet	The tweet to analyse.
+	 * @return	{Boolean}	Whether the given tweet has any attached media or not.
+	 */
+	tweet_has_media(tweet) {
+		return typeof tweet.attachments == "object"
+			&& tweet.attachments.media_keys instanceof Array
+			&& tweet.attachments.media_keys.length > 0
 	}
 	
 	async process_tweet(tweet) {
