@@ -15,6 +15,10 @@ npm install --save twitter-academic-downloader
 -----
 
 
+## v1.2
+ - Also download, process, & anonymise attached media
+
+
 ## v1.1.1
  - Default to 100 tweets per request, because we request `context_annotations`
 
