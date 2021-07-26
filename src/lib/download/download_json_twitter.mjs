@@ -22,7 +22,7 @@ export default async function(credentials, path, get_params) {
 		url,
 		headers: {
 			authorization: `Bearer ${credentials.bearer_token}`,
-			"user-agent": `AcademicTweetDownloader/${version} (Node.js/${process.version}; ${os.platform()} ${os.arch()}; ${credentials.contact_address}) dynamic-flood-mapping`
+			"user-agent": `twitter-academic-downloader/${version} (Node.js/${process.version}; ${os.platform()} ${os.arch()}; ${credentials.contact_address}) dynamic-flood-mapping`
 		}
 	});
 	l.debug(`[DEBUG:download_json_twitter] GET ${response.statusCode} ${url}`);
