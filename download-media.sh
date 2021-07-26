@@ -101,7 +101,9 @@ download_single() {
 	if [[ -e "${PWD}/${filename}" ]]; then return 0; fi
 	
 	# Download the image
-	curl --user-agent "${curl_user_agent}" -sSL "${url}" -o "${filename}";
+	# By default an exponential backoff algorithm is used
+	# curl will also comply with the Retry-After HTTP header.
+	curl --retry 7 --user-agent "${curl_user_agent}" -sSL "${url}" -o "${filename}";
 	
 	
 	time_start="$(date +%s%N)"; # nanoseconds
