@@ -39,7 +39,7 @@ check_command deface;
 check_command mogrify;
 
 optimise_png_binary=oxipng;
-optimise_png_flags="-omax -Dp --fix";
+optimise_png_flags="-omax -Dpq --fix";
 optimise_jpeg_binary=jpegoptim;
 if ! command_exists jpegoptim; then
 	echo "jpegoptim not detected, not optimising JPEG images" >&2;
@@ -49,7 +49,7 @@ if ! command_exists oxipng; then
 	if command_exists optipng; then
 		echo "Using optipng instead of oxipng. For better performance, please install oxipng: <https://github.com/shssoichiro/oxipng>.";
 		optimise_png_binary=optipng;
-		optimise_png_flags="-preserve";
+		optimise_png_flags="-preserve -quiet";
 	else
 		unset optimise_png_binary;
 		echo "Neither oxipng (preferred) or optipng (fallback) could be found - not optimising PNG images";
@@ -75,7 +75,7 @@ optimise_image() {
 	case "${extension}" in
 		jpeg|jpg|JPEG|JPG )
 			if [[ -z "${optimise_jpeg_binary}" ]]; then return 0; fi
-			"${optimise_jpeg_binary}" --all-progressive --preserve "${filepath}";
+			"${optimise_jpeg_binary}" --all-progressive --preserve --quiet "${filepath}";
 			;;
 		png|PNG )
 			if [[ -z "${optimise_jpeg_binary}" ]]; then return 0; fi
