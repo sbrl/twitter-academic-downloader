@@ -120,7 +120,11 @@ download_single() {
 	fi
 	
 	deface -o "${filename}" "${filename}";	# Blur faces
-	optimise_image "${filename}";			# Optimise the image to reduce filesize
+	if [[ "$?" -ne 0 ]]; then
+		rm "${filename}";					# if deface fails, we can't risk keeping the image
+	else
+		optimise_image "${filename}";		# Optimise the image to reduce filesize
+	fi
 	
 	downloaded_count="$((downloaded_count + 1))";
 	echo -ne "${downloaded_count} downloaded so far; latest: ${url}\r";
