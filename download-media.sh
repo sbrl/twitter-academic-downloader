@@ -84,7 +84,7 @@ optimise_image() {
 			"${optimise_png_binary}" ${optimise_png_flags} "${filepath}";
 			;;
 		* )
-			echo "Warning: Unknown file extension for '${filepath}', skipping" >&2;
+			echo "Warning: Unknown file extension for '${filepath}', not optimising" >&2;
 			return 0;
 			;;
 	esac
