@@ -36,9 +36,10 @@ check_command curl;
 check_command jq;
 check_command awk;
 check_command deface;
+check_command mogrify;
 
 optimise_png_binary=oxipng;
-optimise_png_flags="-omax -Dp";
+optimise_png_flags="-omax -Dp --fix";
 optimise_jpeg_binary=jpegoptim;
 if ! command_exists jpegoptim; then
 	echo "jpegoptim not detected, not optimising JPEG images" >&2;
@@ -77,6 +78,8 @@ optimise_image() {
 			"${optimise_jpeg_binary}" --all-progressive --preserve "${filepath}";
 			;;
 		png|PNG )
+			# Strip all alpha - deface doesn't like transparent PNGs apparently
+			mogrify -background white -alpha remove -alpha off "${filepath}";
 			if [[ -z "${optimise_jpeg_binary}" ]]; then return 0; fi
 			"${optimise_png_binary}" ${optimise_png_flags} "${filepath}";
 			;;
