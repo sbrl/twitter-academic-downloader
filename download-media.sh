@@ -78,8 +78,6 @@ optimise_image() {
 			"${optimise_jpeg_binary}" --all-progressive --preserve "${filepath}";
 			;;
 		png|PNG )
-			# Strip all alpha - deface doesn't like transparent PNGs apparently
-			mogrify -background white -alpha remove -alpha off "${filepath}";
 			if [[ -z "${optimise_jpeg_binary}" ]]; then return 0; fi
 			"${optimise_png_binary}" ${optimise_png_flags} "${filepath}";
 			;;
@@ -99,6 +97,7 @@ download_single() {
 	
 	url="${1}";
 	filename="$(basename "${url}")";
+	extension="${filename##*.}";
 	
 	# Don't download things twice
 	if [[ -e "${PWD}/${filename}" ]]; then
@@ -113,6 +112,11 @@ download_single() {
 	
 	
 	time_start="$(date +%s%N)"; # nanoseconds
+	
+	# Strip the alpha channel from PNGs - deface doesn't like transparent PNGs apparently :-/
+	if [[ "${extension}" == "png" ]] || [[ "${extension}" == "PNG" ]]; then
+		mogrify -background white -alpha remove -alpha off "${filepath}";
+	fi
 	
 	deface -o "${filename}" "${filename}";	# Blur faces
 	optimise_image "${filename}";			# Optimise the image to reduce filesize
