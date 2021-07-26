@@ -238,11 +238,13 @@ Thank you :-)
 				"source",
 				"conversation_id",
 				"referenced_tweets",
-				"public_metrics"
+				"public_metrics",
+				"attachments"
 			].join(","),
 			expansions: [
 				"author_id",
-				"geo.place_id"
+				"geo.place_id",
+				"attachments.media_keys"
 			].join(","),
 			"user.fields": [
 				"username",
@@ -256,6 +258,9 @@ Thank you :-)
 				"geo",
 				"id",
 				"place_type",
+			].join(","),
+			"media.fields": [
+				"url", "type", "public_metrics"
 			].join(",")
 		};
 		// l.log(`[TweetDownloadManager:download_single] params`, params);
