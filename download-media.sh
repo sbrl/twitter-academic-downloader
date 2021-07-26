@@ -119,7 +119,7 @@ download_single() {
 		mogrify -background white -alpha remove -alpha off -flatten "${filename}";
 	fi
 	
-	deface -o "${filename}" "${filename}";	# Blur faces
+	deface -o "${filename}" "${filename}" >/dev/null; # Blur faces
 	if [[ "$?" -ne 0 ]]; then
 		rm "${filename}";					# if deface fails, we can't risk keeping the image
 	else
