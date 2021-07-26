@@ -115,7 +115,7 @@ download_single() {
 	
 	# Strip the alpha channel from PNGs - deface doesn't like transparent PNGs apparently :-/
 	if [[ "${extension}" == "png" ]] || [[ "${extension}" == "PNG" ]]; then
-		mogrify -background white -alpha remove -alpha off "${filepath}";
+		mogrify -background white -alpha remove -alpha off "${filename}";
 	fi
 	
 	deface -o "${filename}" "${filename}";	# Blur faces
