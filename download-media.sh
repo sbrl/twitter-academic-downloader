@@ -101,7 +101,10 @@ download_single() {
 	filename="$(basename "${url}")";
 	
 	# Don't download things twice
-	if [[ -e "${PWD}/${filename}" ]]; then return 0; fi
+	if [[ -e "${PWD}/${filename}" ]]; then
+		echo -e "${filename} already exists; skipping";
+		return 0;
+	fi
 	
 	# Download the image
 	# By default an exponential backoff algorithm is used
