@@ -177,6 +177,20 @@ jq --raw-output '.text' <tweets-all.jsonl | sed -e 's/[][{}()"+|&^\/@#?!_:;*â€™â
 Note that this isn't perfect - some manual cleaning will be required, as even the [wikipedia list of whitespace characters](https://en.wikipedia.org/wiki/Whitespace_character) appears to be incomplete O.o
 
 
+### Extract start date
+Extract the earliest date a tweet was made in a given dataset like so:
+
+```bash
+jq --raw-output '.created_at' <"StormDennis/tweets.jsonl" | head | xargs -n1 date +%s --date | sort -n | head -n1 | xargs -I {} date --rfc-3339=seconds --date @{}
+```
+
+For multiple files, do this:
+
+```bash
+find . -name 'tweets.jsonl' -print0 | xargs -I{} -P "$(nproc)" -0 bash -c 'in="{}"; echo -e "$(dirname "$in")\t$(jq --raw-output .created_at <"$in" | head | xargs -n1 date +%s --date | sort -n | head -n1 | xargs -I {} date --rfc-3339=seconds --date @{})";' | tee start-times-fixed.txt
+```
+
+
 ## Useful Links
  - `phin` (the HTTP client library we're using) docs: https://ethanent.github.io/phin/global.html
  - Twitter API full archive search reference: https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-all
