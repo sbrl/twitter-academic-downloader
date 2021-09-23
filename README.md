@@ -213,10 +213,10 @@ find . -type f -iname 'tweets-labelled.jsonl' -print0 | xargs -I{} -0 bash -c 'e
  - Twitter API full archive search reference: https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-all
  - Twitter API building queries: https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query
 
- 
- ## Contributing
- Contributions are welcome as [pull requests](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests)! Don't forget to say that you donate your contribution under the _Mozilla Public License 2.0_ in your PR comment, otherwise I won't be able to merge it.
+
+## Contributing
+Contributions are welcome as [pull requests](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests)! Don't forget to say that you donate your contribution under the _Mozilla Public License 2.0_ in your PR comment, otherwise I won't be able to merge it.
 
 
- ## Licence
- This project is licensed under the _Mozilla Public License 2.0_. See the `LICENSE` file in this repository for the full text. Tldr legal have a [great summary](https://tldrlegal.com/license/mozilla-public-license-2.0-(mpl-2)) of the license if you're interested.
+## Licence
+This project is licensed under the _Mozilla Public License 2.0_. See the `LICENSE` file in this repository for the full text. Tldr legal have a [great summary](https://tldrlegal.com/license/mozilla-public-license-2.0-(mpl-2)) of the license if you're interested.
