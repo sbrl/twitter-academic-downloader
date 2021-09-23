@@ -204,7 +204,7 @@ For a directory of runs, you can mass-evaluate all of them at once like this:
 
 
 ```bash
-find . -type f -iname 'tweets-labelled.jsonl' -print0 | xargs -I{} -0 bash -c 'echo -e "$(basename "$(dirname "{}")")\t$(cat {} | jq --raw-output .label | sort | uniq -c | tr "\n" " ")";';
+find . -type f -iname 'tweets-labelled.jsonl' -print0 | xargs -I{} -0 bash -c 'echo -ne "$(basename "$(dirname "{}")")\t$(cat {} | jq --raw-output .label | sort | uniq -c | tr "\n" " ")\n";' | awk 'BEGIN { print("PLACE\tNEGATIVE\tPOSITIVE\tTOTAL\tNEGATIVE_PERCENT\tPOSITIVE_PERCENT\nORDER"); RS="\n"; OFS="\t"; } { total=$2+$4; if(total > 0) print($1, $2, $4, total, $2 / total*100, $4 / total*100, $3 "-" $5); else print($1, 0, 0, 0); }'
 ```
 
 
