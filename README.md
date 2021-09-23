@@ -149,7 +149,7 @@ Exit code	| Meaning
 
 
 ## Analysing the data
-Useful commands and quick Bash one-liners
+Useful commands and quick Bash one-liners. It is recommended that you are confident with Bash to use this section. If you aren't, please skip this section and continue reading the useful links,  contributing, and licence sections.
 
 ### Plot a frequency graph
 Run the following command:
@@ -161,6 +161,33 @@ cat tweets.jsonl | jq --raw-output .created_at | awk 'BEGIN { FS="T" } { print $
 ...replacing `tweets.jsonl` and `frequencies.tsv` with the input and output files respectively.
 
 Then, open the resulting file in your favourite editor (e.g. Libreoffice Calc) to plot the graph (swap the columns around).
+
+#### ....with sentiment
+
+To plot it with positive/negative sentiment (AFTER labelling a given dataset), do the following to generate a tab-separated values (TSV) file:
+
+```bash
+
+```
+
+To do the same for multiple downloads at a time, save this as a script and `chmod +x` it:
+```bash
+#!/usr/bin/env bash
+
+generate() {
+	filename="${1}";
+	dir="$(dirname "${filename}")";
+	target="${dir}/$(basename "${dir}")-sentiment.tsv";
+	jq --raw-output '[ .created_at, .label ] | @tsv' < "${filename}" | awk '{ gsub("T.*", "", $1); print( $1 "\t" $2); }' | sort | uniq -c | awk 'BEGIN { OFS="\t"; printf("DATE\tPOSITIVE\tNEGATIVE"); } { date=$2; sent=$3; count=$1; if(date != last_date) print(last_date, acc_positive, acc_negative); if(sent == "positive") acc_positive=count; else acc_negative=$1; last_date=$2; }' > "${target}";
+}
+
+export -f generate;
+
+find . -iname 'tweets-labelled.jsonl' -print0 | xargs -P "$(nproc)" -0 -I {} bash -c 'generate "{}"';
+
+```
+
+...and then `cd` to the directory containing the tweets in question, and then 
 
 ### Various useful `jq` things
 
@@ -197,14 +224,14 @@ To get the end date instead of the start date, change the `sort -n` to `sort -nr
 AFTER you have labelled the dataset with the sentiment analysis tweet labeller [in a separate repository - link coming soon], then the sentiments can be tallied like so:
 
 ```bash
-cat tweets.jsonl | jq --raw-output .label | sort | uniq -c | tr "\n" " "
+cat tweets-labelled.jsonl | jq --raw-output .label | sort | uniq -c | tr "\n" " "
 ```
 
 For a directory of runs, you can mass-evaluate all of them at once like this:
 
 
 ```bash
-find . -type f -iname 'tweets-labelled.jsonl' -print0 | xargs -I{} -0 bash -c 'echo -ne "$(basename "$(dirname "{}")")\t$(cat {} | jq --raw-output .label | sort | uniq -c | tr "\n" " ")\n";' | awk 'BEGIN { print("PLACE\tNEGATIVE\tPOSITIVE\tTOTAL\tNEGATIVE_PERCENT\tPOSITIVE_PERCENT\nORDER"); RS="\n"; OFS="\t"; } { total=$2+$4; if(total > 0) print($1, $2, $4, total, $2 / total*100, $4 / total*100, $3 "-" $5); else print($1, 0, 0, 0); }'
+find . -type f -iname 'tweets-labelled.jsonl' -print0 | xargs -I{} -0 bash -c 'echo -ne "$(basename "$(dirname "{}")")\t$(cat {} | jq --raw-output .label | sort | uniq -c | tr "\n" " ")\n";' | awk 'BEGIN { print("PLACE\tNEGATIVE\tPOSITIVE\tTOTAL\tNEGATIVE_PERCENT\tPOSITIVE_PERCENT\tORDER"); RS="\n"; OFS="\t"; } { total=$2+$4; if(total > 0) print($1, $2, $4, total, $2 / total*100, $4 / total*100, $3 "-" $5); else print($1, 0, 0, 0); }'
 ```
 
 
