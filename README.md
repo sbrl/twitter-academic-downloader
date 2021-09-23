@@ -187,7 +187,24 @@ jq --raw-output '.created_at' <"StormDennis/tweets.jsonl" | head | xargs -n1 dat
 For multiple files, do this:
 
 ```bash
-find . -name 'tweets.jsonl' -print0 | xargs -I{} -P "$(nproc)" -0 bash -c 'in="{}"; echo -e "$(dirname "$in")\t$(jq --raw-output .created_at <"$in" | head | xargs -n1 date +%s --date | sort -n | head -n1 | xargs -I {} date --rfc-3339=seconds --date @{})";' | tee start-times-fixed.txt
+find . -name 'tweets.jsonl' -print0 | xargs -I{} -P "$(nproc)" -0 bash -c 'in="{}"; echo -e "$(dirname "$in")\t$(jq --raw-output .created_at <"$in" | xargs -n1 date +%s --date | sort -n | head -n1 | xargs -I {} date --rfc-3339=seconds --date @{})";' | tee start-times-fixed.txt
+```
+
+To get the end date instead of the start date, change the `sort -n` to `sort -nr` (i.e. reverse the sort direction).
+
+
+### Count positive/negative sentiment
+AFTER you have labelled the dataset with the sentiment analysis tweet labeller [in a separate repository - link coming soon], then the sentiments can be tallied like so:
+
+```bash
+cat tweets.jsonl | jq --raw-output .label | sort | uniq -c | tr "\n" " "
+```
+
+For a directory of runs, you can mass-evaluate all of them at once like this:
+
+
+```bash
+find . -type f -iname 'tweets-labelled.jsonl' -print0 | xargs -I{} -0 bash -c 'echo -e "$(basename "$(dirname "{}")")\t$(cat {} | jq --raw-output .label | sort | uniq -c | tr "\n" " ")";';
 ```
 
 
