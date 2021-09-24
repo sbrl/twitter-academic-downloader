@@ -151,6 +151,12 @@ Exit code	| Meaning
 ## Analysing the data
 Useful commands and quick Bash one-liners. It is recommended that you are confident with Bash to use this section. If you aren't, please skip this section and continue reading the useful links,  contributing, and licence sections.
 
+These commands may look long and complicated, but they really aren't. Some good resources on the subject:
+
+ - [explainshell.com](https://explainshell.com/)
+ - [Learn your terminal (or command line)](https://starbeamrainbowlabs.com/blog/article.php?article=posts/242-Learn-Your-Terminal.html) on [my blog](https://starbeamrainbowlabs.com/blog/)
+
+
 ### Plot a frequency graph
 Run the following command:
 
@@ -235,6 +241,18 @@ find . -type f -iname 'tweets-labelled.jsonl' -print0 | xargs -I{} -0 bash -c 'e
 ```
 
 
+### Keyword extraction
+To extract a list of key words in a downloaded dataset, it is recommended you first download a [stop words](https://en.wikipedia.org/wiki/Stop_word) list to make the resulting word list more meaningful. I got mine from here: <https://countwordsfree.com/stopwords>. In the unlikely event the site goes down, here's a link to it in the Wayback Machine: <https://web.archive.org/web/20210119165857/https://countwordsfree.com/stopwords>.
+
+Think careful about which list you download, as stop word lists are language-specific.
+
+To generate a list of keywords, do this:
+
+```bash
+jq --raw-output .text <path/to/tweets.jsonl | tr ' [:upper:]' '\n[:lower:]' | grep -ivP "^($(cat path/to/stop_words_english.txt | tr '\n' '|')|-|&[a-z]+;)$" | sort | uniq -c | sort -n;
+```
+
+
 ## Useful Links
  - `phin` (the HTTP client library we're using) docs: https://ethanent.github.io/phin/global.html
  - Twitter API full archive search reference: https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-all
@@ -247,3 +265,5 @@ Contributions are welcome as [pull requests](https://docs.github.com/en/github/c
 
 ## Licence
 This project is licensed under the _Mozilla Public License 2.0_. See the `LICENSE` file in this repository for the full text. Tldr legal have a [great summary](https://tldrlegal.com/license/mozilla-public-license-2.0-(mpl-2)) of the license if you're interested.
+
+The English stop words list in `stop_words_english.txt` is not covered by this licence.
