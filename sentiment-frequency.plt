@@ -18,7 +18,11 @@ set datafile separator "\t"
 set terminal png linewidth 3 size 2000, 500 font "Ubuntu,20"
 
 #plot data_filename using 1:2 with lines linewidth 5 title "Positive (absolute)"
+# plot \
+# 	data_filename using 1:8 with filledcurves x linecolor "#da3a30" title "Negative", \
+# 	data_filename using 1:6 with filledcurves x linecolor "#00683b" title "Positive", \
+# 	data_filename using 1:5 with lines title "Frequency"
 plot \
-	data_filename using 1:8 with filledcurves x linecolor "#da3a30" title "Negative", \
-	data_filename using 1:6 with filledcurves x linecolor "#00683b" title "Positive", \
+	data_filename using 1:8 with filledcurves x linecolor "#00683b" title "Positive", \
+	data_filename using 1:7 with filledcurves x linecolor "#da3a30" title "Negative", \
 	data_filename using 1:5 with lines title "Frequency"
