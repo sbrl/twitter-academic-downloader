@@ -15,6 +15,10 @@ npm install --save twitter-academic-downloader
 -----
 
 
+## v1.3
+ - Bugfix: Properly strip old-style retweets that start with `RT `
+
+
 ## v1.2
  - Also download, process, & anonymise attached media
 

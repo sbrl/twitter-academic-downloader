@@ -94,7 +94,7 @@ class TwitterResponseProcessor extends EventEmitter {
 	 * @return	{Boolean}	Whether this tweet should be kept or not. true = keep, false = discard
 	 */
 	filter_tweet(tweet) {
-		if(tweet.text.match(/^RE\s+[^\s]/)) return false;
+		if(tweet.text.match(/^RT\s+[^\s]/i)) return false;
 		
 		return true;
 	}
