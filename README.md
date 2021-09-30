@@ -148,6 +148,12 @@ Exit code	| Meaning
 3			| Gave up downloading more tweets because of an error parsing a response Twitter sent us
 
 
+## Frequently Asked Questions
+
+### Why can't I download data without anonymising it?
+It was determined by the ethics panel at my University that all social media data downloaded *must* be completely anonymised. To accomplish this and ensure there's no trace of data that hasn't yet been anonymised on disk, twitter-academic-downloader anonymises data before writing it to disk.
+
+
 ## Analysing the data
 Useful commands and quick Bash one-liners. It is recommended that you are confident with Bash to use this section. If you aren't, please skip this section and continue reading the useful links,  contributing, and licence sections.
 
