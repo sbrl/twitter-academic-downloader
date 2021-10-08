@@ -178,7 +178,7 @@ Then, open the resulting file in your favourite editor (e.g. Libreoffice Calc) t
 
 #### ....with sentiment
 
-To plot it with positive/negative sentiment (AFTER labelling a given dataset), do the following to generate a tab-separated values (TSV) file:
+To plot it with positive/negative sentiment (AFTER labelling a given dataset, labeller is in a separate repository - link coming soon), do the following to generate a tab-separated values (TSV) file:
 
 ```bash
 
@@ -222,7 +222,7 @@ Note that this isn't perfect - some manual cleaning will be required, as even th
 Extract the earliest date a tweet was made in a given dataset like so:
 
 ```bash
-jq --raw-output '.created_at' <"StormDennis/tweets.jsonl" | head | xargs -n1 date +%s --date | sort -n | head -n1 | xargs -I {} date --rfc-3339=seconds --date @{}
+jq --raw-output '.created_at' <"StormDennis/tweets.jsonl" | xargs -n1 date +%s --date | sort -n | head -n1 | xargs -I {} date --rfc-3339=seconds --date @{}
 ```
 
 For multiple files, do this:
