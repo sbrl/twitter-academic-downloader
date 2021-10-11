@@ -7,7 +7,7 @@ This command-line program downloads tweets from twitter using the academic full-
  - Anonymise all tweets downloaded (this is automatic can _cannot_ be disabled)
  - Downloads all replies to tweets matched (optional)
 
-Note that the users and places are **not unique** until they are deduplicated by the post-processing script `post-process.sh` - more information about this in the [usage section below](#usage)
+Note that tweets, users, and places are **not unique** until they are deduplicated by the post-processing script `post-process.sh` - more information about this in the [usage section below](#usage)
 
  - **Current version:** ![current npm version - see the GitHub releases](https://img.shields.io/npm/v/twitter-academic-downloader)
  - **Changelog:** https://github.com/sbrl/twitter-academic-downloader/blob/main/CHANGELOG.md
@@ -118,7 +118,7 @@ Some additional options are also supported - do `twitter-academic-downloader --h
 
 Once the downloader has finished, you'll be prompted to execute a Bash script to post-process the data. By default this script is called `post-process.sh`, and you should be prompted as to the exact command you need to copy and paste to run it - regardless of your current working directory.
 
-The purpose of this script is to deduplicate downloaded users and places after the downloader has finished. `post-process.sh` can be safely deleted once it has been executed. Windows users should investigate the Windows Subsystem for Linux or Git Bash.
+The purpose of this script is to deduplicate downloaded tweets, users, and places after the downloader has finished. `post-process.sh` can be safely deleted once it has been executed. Windows users should investigate the Windows Subsystem for Linux or Git Bash.
 
 
 ## Data anonymisation
