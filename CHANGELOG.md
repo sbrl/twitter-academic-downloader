@@ -15,6 +15,10 @@ npm install --save twitter-academic-downloader
 -----
 
 
+## v1.3.2
+ - Really fix `--no-replies` not doing anything
+
+
 ## v1.3.1
  - Bugfix: Fix `--no-replies` argument to the `download` subcommand, which previously had no effect
 
