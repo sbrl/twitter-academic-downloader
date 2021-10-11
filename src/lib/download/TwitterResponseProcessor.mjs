@@ -18,13 +18,12 @@ class TwitterResponseProcessor extends EventEmitter {
 		
 		this.anonymiser = new TweetAnonymiser(anon_salt);
 		
-		if(!fs.existsSync(output_dir)) {
+		if(!fs.existsSync(output_dir))
 			fs.mkdirSync(output_dir, { recursive: true, mode: 0o700 });
-			fs.copyFileSync(
-				path.join(__dirname, "post-process.sh"),
-				path.join(output_dir, "post-process.sh")
-			);
-		}
+		fs.copyFileSync(
+			path.join(__dirname, "post-process.sh"),
+			path.join(output_dir, "post-process.sh")
+		);
 		
 		this.stream_tweets = fs.createWriteStream(path.join(
 			output_dir,
