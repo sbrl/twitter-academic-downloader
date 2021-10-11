@@ -195,14 +195,19 @@ generate() {
 	filename="${1}";
 	dir="$(dirname "${filename}")";
 	target="${dir}/$(basename "${dir}")-sentiment.tsv";
-	jq --raw-output '[ .created_at, .label ] | @tsv' < "${filename}" | awk '{ gsub("T.*", "", $1); print( $1 "\t" $2); }' | sort | uniq -c | awk 'BEGIN { OFS="\t"; printf("DATE\tPOSITIVE\tNEGATIVE"); } { date=$2; sent=$3; count=$1; if(date != last_date) print(last_date, acc_positive, acc_negative); if(sent == "positive") acc_positive=count; else acc_negative=$1; last_date=$2; }' > "${target}";
+	
+	max_per_bin="$(jq --raw-output '[ .created_at ] | @tsv' < "${filename}" | awk '{ gsub("T.*", "", $1); print($1); }' | sort | uniq -c | awk '{ print $1 }' | sort -nr | head -n1)";
+	# echo "MAX_PER_BIN $filename is $max_per_bin";
+	jq --raw-output '[ .created_at, .label ] | @tsv' < "${filename}" | awk '{ gsub("T.*", "", $1); print( $1 "\t" $2); }' | sort | uniq -c | awk -v "max_per_bin=${max_per_bin}" 'BEGIN { if(max_per_bin == "" || max_per_bin == "0") max_per_bin=1; acc_positive=0; acc_negative=0; OFS="\t"; print("DATE\tPOSITIVE\tNEGATIVE\tTOTAL\tTOTAL_NORM\tPERCENT_POSITIVE\tPERCENT_NEGATIVE\tPERCENT_TOTAL"); } { date=$2; sent=$3; count=$1; if(date != last_date && last_date != "") { total=acc_positive+acc_negative; if(total == 0) total=1; print(last_date, acc_positive, acc_negative, total, total/max_per_bin*100, acc_positive/total*100, acc_negative/total*100, 100); acc_positive=0; acc_negative=0; } if(sent == "positive") acc_positive=count; else acc_negative=$1; last_date=$2; }' > "${target}";	
+	echo "DONE $filename";
 }
 
 export -f generate;
 
 find . -iname 'tweets-labelled.jsonl' -print0 | xargs -P "$(nproc)" -0 -I {} bash -c 'generate "{}"';
-
 ```
+
+<!-- We have saved ours as research-data:twitter/sources/make-frequencies-sentiment.tsv -->
 
 ...and then `cd` to the directory containing the tweets in question, and then run it like this:
 
@@ -221,6 +226,7 @@ Again, for multiple runs at once:
 ```bash
 find . -iname '*sentiment.tsv' | while read -r filename; do title="$(basename "${filename}")"; title="${title%-sentiment.tsv}"; out="${filename%.*}.png"; gnuplot -e "graph_subtitle='YOUR_TITLE'" -e "data_filename='$filename'" -e "graph_title='$title'" path/to/sentiment-frequency.plt >"${out}"; done
 ```
+
 
 ### Various useful `jq` things
 
