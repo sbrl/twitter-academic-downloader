@@ -181,10 +181,13 @@ Then, open the resulting file in your favourite editor (e.g. Libreoffice Calc) t
 To plot it with positive/negative sentiment (AFTER labelling a given dataset, labeller is in a separate repository - link coming soon), do the following to generate a tab-separated values (TSV) file:
 
 ```bash
-
+jq --raw-output '[ .created_at, .label ] | @tsv' < "path/to/tweets-labelled.jsonl" | awk '{ gsub("T.*", "", $1); print( $1 "\t" $2); }' | sort | uniq -c | awk 'BEGIN { OFS="\t"; printf("DATE\tPOSITIVE\tNEGATIVE"); } { date=$2; sent=$3; count=$1; if(date != last_date) print(last_date, acc_positive, acc_negative); if(sent == "positive") acc_positive=count; else acc_negative=$1; last_date=$2; }' > "path/to/sentiment.tsv";
 ```
 
+...replacing `path/to/tweets-labelled.jsonl` with the path to your labelled tweets file, and `path/to/output_sentiment.tsv` with the path to the output file to create (or replace).
+
 To do the same for multiple downloads at a time, save this as a script and `chmod +x` it:
+
 ```bash
 #!/usr/bin/env bash
 
@@ -201,7 +204,23 @@ find . -iname 'tweets-labelled.jsonl' -print0 | xargs -P "$(nproc)" -0 -I {} bas
 
 ```
 
-...and then `cd` to the directory containing the tweets in question, and then 
+...and then `cd` to the directory containing the tweets in question, and then run it like this:
+
+```bash
+path/to/your_script.sh
+```
+
+Then, to generate a graph with [Gnuplot](http://gnuplot.info/), download [`sentiment-frequency.plt`](https://raw.githubusercontent.com/sbrl/twitter-academic-downloader/main/sentiment-frequency.plt) and run this:
+
+```bash
+gnuplot -e "graph_subtitle='YOUR_SUBTITLE'" -e "data_filename='path/to/sentiment.tsv'" -e "graph_title='YOUR_TITLE'" path/to/sentiment-frequency.plt >"graph.png";
+```
+
+Again, for multiple runs at once:
+
+```bash
+find . -iname '*sentiment.tsv' | while read -r filename; do title="$(basename "${filename}")"; title="${title%-sentiment.tsv}"; out="${filename%.*}.png"; gnuplot -e "graph_subtitle='YOUR_TITLE'" -e "data_filename='$filename'" -e "graph_title='$title'" path/to/sentiment-frequency.plt >"${out}"; done
+```
 
 ### Various useful `jq` things
 
