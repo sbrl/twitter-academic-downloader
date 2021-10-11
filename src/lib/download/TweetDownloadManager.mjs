@@ -100,7 +100,7 @@ class TweetDownloadManager {
 		
 		await this.do_download_archive(query);
 		// Finish up downloading the remaining replies
-		if(this.download_replies) await this.download_conversation(null);
+		await this.download_conversation(null);
 		
 		time_taken = new Date() - time_taken;
 		
@@ -131,6 +131,10 @@ Thank you :-)
 	 * @return	{Promise}	A promise that resolves when the downloading is complete.
 	 */
 	async download_conversation(conversation_id) {
+		// If we aren't supposed to download replies, skip out here
+		// This function is called by an event listener on the TweetProcessor
+		if(!this.download_replies) return;
+		
 		let query_string = null;
 		if(conversation_id !== null) {
 			// console.log();
