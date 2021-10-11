@@ -26,7 +26,7 @@ export default async function () {
 	let downloader = await TweetDownloadManager.Create(
 		settings.cli.credentials,
 		settings.cli.output,
-		settings.cli.download_replies,
+		!settings.cli.no_replies,
 		settings.cli.tweets_per_request
 	);
 	downloader.query_max_length = settings.cli.max_query_length;

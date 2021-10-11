@@ -15,6 +15,10 @@ npm install --save twitter-academic-downloader
 -----
 
 
+## v1.3.1 (unreleased)
+ - Bugfix: Fix `--no-replies` argument to the `download` subcommand, which previously had no effect
+
+
 ## v1.3
  - Bugfix: Properly strip old-style retweets that start with `RT `
 
