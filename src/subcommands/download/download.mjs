@@ -36,4 +36,6 @@ export default async function () {
 		settings.cli.start_time,
 		settings.cli.end_time
 	);
+	
+	await downloader.end();
 }

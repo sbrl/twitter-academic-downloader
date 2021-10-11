@@ -93,6 +93,9 @@ class TweetDownloadManager {
 		l.log(`${this.download_replies ? "Downloading" : "Not downloading"} replies.`);
 		l.log(`Downloading ${this.tweets_per_api_call} tweets per API call.`);
 		
+		// Tell the writer about the query, as it's useful to have it in the properties TSV file
+		await this.processor.properties(query, start_time, end_time);
+		
 		this.start_time = start_time;
 		this.end_time = end_time;
 		
@@ -119,6 +122,17 @@ Please run the 'post-process.sh' script written to the output directory:
 
 Thank you :-)
 `);
+	}
+	
+	/**
+	 * Closes all streams etc gracefully.
+	 * Also appends final statistics to properties.tsv, thanks to TweetProcessor.
+	 * Note that after calling this function, you will need to reinitialise this
+	 * instance by calling .setup() again if you want to re-use it!
+	 * @return {Promise} A Promise that resolves once everything has been shut down gracefully.
+	 */
+	async end() {
+		await this.processor.end();
 	}
 	
 	/**

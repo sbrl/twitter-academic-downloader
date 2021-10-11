@@ -15,15 +15,18 @@ class TwitterResponseProcessor extends EventEmitter {
 		super();
 		
 		this.output_dir = output_dir;
+		this.filepath_properties = path.join(output_dir, "properties.tsv");
 		
 		this.anonymiser = new TweetAnonymiser(anon_salt);
 		
 		if(!fs.existsSync(output_dir))
 			fs.mkdirSync(output_dir, { recursive: true, mode: 0o700 });
+		
 		fs.copyFileSync(
 			path.join(__dirname, "post-process.sh"),
 			path.join(output_dir, "post-process.sh")
 		);
+		
 		
 		this.stream_tweets = fs.createWriteStream(path.join(
 			output_dir,
@@ -37,11 +40,26 @@ class TwitterResponseProcessor extends EventEmitter {
 			output_dir,
 			"places.jsonl"
 		));
+		
+		this.date_start = null;
+		this.date_end = null;
 		// 
 		// this.stream_tweets_with_replies = fs.createWriteStream(path.join(
 		// 	output_dir,
 		// 	"conversation_ids_with_replies.txt"
 		// ));
+	}
+	
+	async properties(query, start_time, end_time) {
+		await fs.promises.writeFile(
+			this.filepath_properties,
+			`PROPERTY\tVALUE\n`+
+			[
+				["QUERY", query || "***UNKNOWN***"],
+				["TIME_START", start_time.toISOString()],
+				["TIME_END", end_time instanceof Date ? end_time.toISOString() : ""]
+			].map(item => `${item[0]}\t${item[1]}`).join("\n")
+		)
 	}
 	
 	async process(response) {
@@ -79,7 +97,11 @@ class TwitterResponseProcessor extends EventEmitter {
 	}
 	
 	async end() {
+		const date_start = this.date_start instanceof Date ? this.date_start.toISOString() : "";
+		const date_end = this.date_end instanceof Date ? this.date_end.toISOString() : "";
+		
 		await Promise.all([
+			fs.promises.appendFile(this.filepath_properties, `\nTWEETS_START\t${date_start}\nTWEETS_END\t${date_end}\n`),
 			end_safe(this.stream_tweets),
 			end_safe(this.stream_users),
 			end_safe(this.stream_places),
@@ -119,6 +141,12 @@ class TwitterResponseProcessor extends EventEmitter {
 	
 	async process_tweet(tweet) {
 		if(!this.filter_tweet(tweet)) return;
+		
+		const tweet_date = new Date(tweet.created_at);
+		if(this.date_start == null) this.date_start = tweet_date;
+		if(this.date_end == null) this.date_end = tweet_date;
+		if(this.date_start > tweet_date) this.date_start = tweet_date;
+		if(this.date_end < tweet_date) this.date_end = tweet_date;
 		
 		if(tweet.public_metrics.reply_count > 0) {
 			// l.log(`Tweet id ${tweet.id} has metrics`, tweet.public_metrics);
