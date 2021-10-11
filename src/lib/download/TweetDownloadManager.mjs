@@ -100,7 +100,7 @@ class TweetDownloadManager {
 		
 		await this.do_download_archive(query);
 		// Finish up downloading the remaining replies
-		await this.download_conversation(null);
+		if(this.download_replies) await this.download_conversation(null);
 		
 		time_taken = new Date() - time_taken;
 		
