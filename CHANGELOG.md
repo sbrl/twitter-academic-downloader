@@ -15,9 +15,13 @@ npm install --save twitter-academic-downloader
 -----
 
 
-## v1.3.2
+## v1.4
  - Really fix `--no-replies` not doing anything
  - Ensure tweets are actually unique in `post-process.sh`
+ - Add new `properties.tsv` output artefact, which contains useful info about that downloading run:
+     - Original search query
+     - Set set/end dates
+     - Calculated start/end dates based on tweets downloaded
 
 
 ## v1.3.1
