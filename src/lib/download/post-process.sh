@@ -62,3 +62,11 @@ display_ratio "users.jsonl" "users-unique.jsonl";
 
 rm users.jsonl;
 mv users-unique.jsonl users.jsonl;
+
+
+jq --slurp -c 'unique_by(.id) | .[]' <tweets.jsonl >tweets-unique.jsonl;
+echo -n "tweets:";
+display_ratio "tweets.jsonl" "tweets-unique.jsonl";
+
+rm tweets.jsonl;
+mv tweets-unique.jsonl tweets.jsonl;
