@@ -165,6 +165,22 @@ These commands may look long and complicated, but they really aren't. Some good 
  - [Learn your terminal (or command line)](https://starbeamrainbowlabs.com/blog/article.php?article=posts/242-Learn-Your-Terminal.html) on [my blog](https://starbeamrainbowlabs.com/blog/)
 
 
+### Extract only replies / non-replies
+If you downloaded replies as well as the original tweets, they are all stored in the same file `tweets.jsonl`. There is, however, a way to distinguish between them with the `referenced_tweets` property.
+
+Print only non-replies (beware, this also excludes original top-level tweets from the perspective of the original query you searched for that were themselves replies to other tweets):
+
+```bash
+jq --raw-output 'select(.referenced_tweets == null or ([ .referenced_tweets[].type ] | index("replied_to") == null))' <tweets-labelled.jsonl
+```
+
+Print only replies (as above, this includes original tweets captured by the search query that were replies to other tweets):
+
+```bash
+jq --raw-output 'select(.referenced_tweets != null) | select([ .referenced_tweets[].type ] | index("replied_to") != null)' <tweets-labelled.jsonl
+```
+
+
 ### Plot a frequency graph
 Run the following command:
 
