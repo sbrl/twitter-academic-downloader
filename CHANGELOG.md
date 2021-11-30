@@ -15,6 +15,10 @@ npm install --save twitter-academic-downloader
 -----
 
 
+## v1.5 (unreleased)
+ - Update dependencies
+
+
 ## v1.4
  - Really fix `--no-replies` not doing anything
  - Ensure tweets are actually unique in `post-process.sh`
