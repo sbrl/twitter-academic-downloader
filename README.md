@@ -207,7 +207,7 @@ To do the same for multiple downloads at a time, save this as a script and `chmo
 ```bash
 #!/usr/bin/env bash
 
-# This script generates a tab-separateed values list of rows, 1 for each flood.
+# This script generates a tab-separated values list of rows, 1 for each flood.
 # For each flood, totals are calculated and the positive and negative sentiment
 # are converted to percentages.
 
