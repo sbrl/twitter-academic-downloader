@@ -207,17 +207,37 @@ To do the same for multiple downloads at a time, save this as a script and `chmo
 ```bash
 #!/usr/bin/env bash
 
+# This script generates a tab-separateed values list of rows, 1 for each flood.
+# For each flood, totals are calculated and the positive and negative sentiment
+# are converted to percentages.
+
+replies="${1:-yes}";
+
 generate() {
 	filename="${1}";
+	
+	# Environment variables:
+	# 
+	# replies		Whether replies should be included in the analysis or not [default: yes]
+	
 	dir="$(dirname "${filename}")";
 	target="${dir}/$(basename "${dir}")-sentiment.tsv";
 	
-	max_per_bin="$(jq --raw-output '[ .created_at ] | @tsv' < "${filename}" | awk '{ gsub("T.*", "", $1); print($1); }' | sort | uniq -c | awk '{ print $1 }' | sort -nr | head -n1)";
+	jq_query_a="[ .created_at ] | @tsv";
+	jq_query_b="[ .created_at, .label ] | @tsv";
+	jq_query_noreply_filter="select(.referenced_tweets == null or ([ .referenced_tweets[].type ] | index(\"replied_to\") == null)) | ";
+	if [[ "${replies}" == "no" ]]; then
+		jq_query_a="${jq_query_noreply_filter}${jq_query_a}";
+		jq_query_b="${jq_query_noreply_filter}${jq_query_b}";
+	fi
+	
+	max_per_bin="$(jq --raw-output "${jq_query_a}" < "${filename}" | awk '{ gsub("T.*", "", $1); print($1); }' | sort | uniq -c | awk '{ print $1 }' | sort -nr | head -n1)";
 	# echo "MAX_PER_BIN $filename is $max_per_bin";
-	jq --raw-output '[ .created_at, .label ] | @tsv' < "${filename}" | awk '{ gsub("T.*", "", $1); print( $1 "\t" $2); }' | sort | uniq -c | awk -v "max_per_bin=${max_per_bin}" 'BEGIN { if(max_per_bin == "" || max_per_bin == "0") max_per_bin=1; acc_positive=0; acc_negative=0; OFS="\t"; print("DATE\tPOSITIVE\tNEGATIVE\tTOTAL\tTOTAL_NORM\tPERCENT_POSITIVE\tPERCENT_NEGATIVE\tPERCENT_TOTAL"); } { date=$2; sent=$3; count=$1; if(date != last_date && last_date != "") { total=acc_positive+acc_negative; if(total == 0) total=1; print(last_date, acc_positive, acc_negative, total, total/max_per_bin*100, acc_positive/total*100, acc_negative/total*100, 100); acc_positive=0; acc_negative=0; } if(sent == "positive") acc_positive=count; else acc_negative=$1; last_date=$2; }' > "${target}";	
+	jq --raw-output "${jq_query_b}" < "${filename}" | awk '{ gsub("T.*", "", $1); print( $1 "\t" $2); }' | sort | uniq -c | awk -v "max_per_bin=${max_per_bin}" 'BEGIN { if(max_per_bin == "" || max_per_bin == "0") max_per_bin=1; acc_positive=0; acc_negative=0; OFS="\t"; print("DATE\tPOSITIVE\tNEGATIVE\tTOTAL\tTOTAL_NORM\tPERCENT_POSITIVE\tPERCENT_NEGATIVE\tPERCENT_TOTAL"); } { date=$2; sent=$3; count=$1; if(date != last_date && last_date != "") { total=acc_positive+acc_negative; if(total == 0) total=1; print(last_date, acc_positive, acc_negative, total, total/max_per_bin*100, acc_positive/total*100, acc_negative/total*100, 100); acc_positive=0; acc_negative=0; } if(sent == "positive") acc_positive=count; else acc_negative=$1; last_date=$2; }' > "${target}";	
 	echo "DONE $filename";
 }
 
+export replies;
 export -f generate;
 
 find . -iname 'tweets-labelled.jsonl' -print0 | xargs -P "$(nproc)" -0 -I {} bash -c 'generate "{}"';
