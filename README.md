@@ -322,7 +322,7 @@ To get the end date instead of the start date, change the `sort -n` to `sort -nr
 AFTER you have labelled the dataset with the sentiment analysis tweet labeller [in a separate repository - link coming soon], then the sentiments can be tallied like so:
 
 ```bash
-cat tweets-labelled.jsonl | jq --raw-output .label | sort | uniq -c | tr "\n" " "
+cat tweets-labelled.jsonl | jq --raw-output '.label' | sort | uniq -c | tr "\n" " "
 ```
 
 For a directory of runs, you can mass-evaluate all of them at once like this:
@@ -331,6 +331,21 @@ For a directory of runs, you can mass-evaluate all of them at once like this:
 ```bash
 find . -type f -iname 'tweets-labelled.jsonl' -print0 | xargs -I{} -0 bash -c 'echo -ne "$(basename "$(dirname "{}")")\t$(cat {} | jq --raw-output .label | sort | uniq -c | tr "\n" " ")\n";' | awk 'BEGIN { print("PLACE\tNEGATIVE\tPOSITIVE\tTOTAL\tNEGATIVE_PERCENT\tPOSITIVE_PERCENT\tORDER"); RS="\n"; OFS="\t"; } { total=$2+$4; if(total > 0) print($1, $2, $4, total, $2 / total*100, $4 / total*100, $3 "-" $5); else print($1, 0, 0, 0); }'
 ```
+
+If you'd like to filter out replies (see "extract only replies" above for caveats), do this instead:
+
+```bash
+cat tweets-labelled.jsonl | jq --raw-output 'select(.referenced_tweets == null or ([ .referenced_tweets[].type ] | index(\"replied_to\") == null)) | .label' | sort | uniq -c | tr "\n" " "
+```
+
+To filter out replies for a directory of runs:
+
+```bash
+find . -type f -iname 'tweets-labelled.jsonl' -print0 | xargs -I{} -0 bash -c 'echo -ne "$(basename "$(dirname "{}")")\t$(cat {} | jq --raw-output '"'select(.referenced_tweets == null or ([ .referenced_tweets[].type ] | index(\"replied_to\") == null)) | .label'"' | sort | uniq -c | tr "\n" " ")\n";' | awk 'BEGIN { print("PLACE\tNEGATIVE\tPOSITIVE\tTOTAL\tNEGATIVE_PERCENT\tPOSITIVE_PERCENT\tORDER"); RS="\n"; OFS="\t"; } { total=$2+$4; if(total > 0) print($1, $2, $4, total, $2 / total*100, $4 / total*100, $3 "-" $5); else print($1, 0, 0, 0); }'
+```
+
+
+
 
 
 ### Keyword extraction
