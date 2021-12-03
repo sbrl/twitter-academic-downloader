@@ -243,6 +243,29 @@ Again, for multiple runs at once:
 find . -iname '*sentiment.tsv' | while read -r filename; do title="$(basename "${filename}")"; title="${title%-sentiment.tsv}"; out="${filename%.*}.png"; gnuplot -e "graph_subtitle='YOUR_TITLE'" -e "data_filename='$filename'" -e "graph_title='$title'" path/to/sentiment-frequency.plt >"${out}"; done
 ```
 
+#### ....for many datasets at once
+
+```bash
+#!/usr/bin/env bash
+
+# Make a temporary directory [and delete it after we're done]
+temp_dir="$(mktemp --tmpdir -d "twitter-frequencies-XXXXXXX")";
+on_exit() { rm -rf "${temp_dir}"; }
+trap on_exit EXIT;
+
+# Get a frequency column for a single file
+freq() { filepath="${1}"; echo "$(basename "$(dirname "${filepath}")")"; cat "${filepath}" | jq --raw-output .created_at | awk 'BEGIN { FS="T" } { print $1 }' | sort | uniq -c | awk '{print $1}'; }
+
+export -f freq;
+export temp_dir;
+
+# Generate columns for all datasets in question
+find . -type f -iname "tweets.jsonl" -print0 | xargs -0 -P "$(nproc)" -I {} bash -c 'filepath="{}"; freq "${filepath}" >"${temp_dir}/$(basename "$(dirname "${filepath}")").txt";';
+
+readarray -t filepaths < <(find "${temp_dir}" -type f -iname '*.txt');
+paste "${filepaths[@]}";
+```
+
 
 ### Various useful `jq` things
 
