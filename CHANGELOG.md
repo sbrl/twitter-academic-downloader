@@ -15,8 +15,9 @@ npm install --save twitter-academic-downloader
 -----
 
 
-## v1.5 (unreleased)
+## v1.4.1 (unreleased)
  - Update dependencies
+ - Update FAQ with section on downloading media
 
 
 ## v1.4

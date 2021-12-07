@@ -11,7 +11,9 @@ Note that tweets, users, and places are **not unique** until they are deduplicat
 
  - **Current version:** ![current npm version - see the GitHub releases](https://img.shields.io/npm/v/twitter-academic-downloader)
  - **Changelog:** https://github.com/sbrl/twitter-academic-downloader/blob/main/CHANGELOG.md
- 
+
+Are you using twitter-academic-downloader for your research? Please let me know that this has helped you by [replying to this GitHub discussion](https://github.com/sbrl/twitter-academic-downloader/discussions/2)!
+
 <!-- Original package.json description: Social Media analysis for the dynamic mapping of floods -->
 
 ## System Requirements
@@ -154,6 +156,76 @@ Exit code	| Meaning
 It was determined by the ethics panel at my University that all social media data downloaded *must* be completely anonymised. To accomplish this and ensure there's no trace of data that hasn't yet been anonymised on disk, twitter-academic-downloader anonymises data before writing it to disk.
 
 Please don't ask me to add a feature to bypass the anonymisation. Such requests will not be considered, and any pull requests implementing this will unfortunately be closed with being merged.
+
+### How can I download pictures attached to the tweets I've downloaded?
+Downloading media isn't included in the default `twitter-academic-downloader` program (though it might in future), but that doesn't mean to say that you can't download it. I've written a script for doing just this:
+
+[`download-media.sh`](https://github.com/sbrl/twitter-academic-downloader/blob/main/download-media.sh) ([direct link](https://raw.githubusercontent.com/sbrl/twitter-academic-downloader/main/download-media.sh))
+
+It's designed for Linux systems - Windows users will need to use the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install). Start by downloading the script. Skip this step if you've cloned this git repository.
+
+```bash
+curl -OL https://raw.githubusercontent.com/sbrl/twitter-academic-downloader/main/download-media.sh
+chmod +x download-media.sh; # Make it executable
+```
+
+The following dependencies are required to run the script. Installation commands are provided for `apt`-based systems - if you're isn't please translate commands for your system.
+
+ - `awk` - for text processing - installed by default on most systems (if not, `sudo apt install gawk`)
+ - [`jq`](https://stedolan.github.io/jq/) - for JSON handling - `sudo apt install jq`
+ - [`deface`](https://github.com/ORB-HD/deface) - for blurring faces - `sudo python3 -m pip install deface`
+ - [ImageMagick](https://imagemagick.org/) - for image handling - `sudo apt install imagemagick`
+
+Optional dependencies:
+
+ - [`jpegoptim`](https://github.com/tjko/jpegoptim) - For losslessly optimising the filesize of downloaded JPEGs to save disk space
+ - [`oxipng`](https://github.com/shssoichiro/oxipng) - For losslessly optimising the filesize of downloaded PNGs to save disk space
+     - Install <https://rustup.rs/> (no admin required), then do `cargo install oxipng` (CPU intensive)
+     - Alternatively, install `optipng` instead - `sudo apt install optipng`
+         - Not as good as `oxipng` and not multithreaded, but easier to install
+
+The script will complain at you if you're missing a dependency. Read the error message it generates and this should tell you what you're missing.
+
+To use the script, you must first create the directory to download media files into and `cd` into it. I'm calling it `media_files` for the purposes of this tutorial, but you can call it whatever you like and put it wherever you like (I recommend making sure you keep your downloaded data organised - it can quickly become a mess :P).
+
+```bash
+mkdir media_files
+cd media_files
+```
+
+Then, do this to download the media files referenced by the given `tweets.jsonl` file into the current directory:
+
+```bash
+../download-media.sh path/to/tweets.jsonl
+```
+
+...where `path/to/tweets.jsonl` is the path to the `tweets.jsonl` file that `twitter-academic-downloader` has downloaded. `../download-media.sh` is the (relative or absolute, it doesn't matter) path to the script you downloaded earlier.
+
+This script will:
+
+ - Download all images marked as a `photo` referenced by the given `tweets.jsonl` file
+ - If `jpegoptim` and/or `oxipng`/`optipng` are installed, losslessly optimise the size of all images downloaded
+ - Blur all faces in all downloaded images
+ - Strip the alpha channel from all downloaded images (`deface` doesn't like transparent images :-/)
+ - Discard all invalid images
+ - Discard all images that `deface` doesn't like (can't risk keeping any potentially non-anonymised images)
+
+Note that while all invalid images are discarded, Tensorflow, Keras, and other frameworks have a much narrower view of what's a valid image than ImageMagick, jpegoptim, oxipng/optipng etc, so you'll still need to properly handle errors when loading images into your framework of choice.
+
+Also note that any requests to remove automatic `deface` support for blurring images that do not suggest an alternative program for performing the same thing will be rejected because of aforementioned ethical concerns.
+
+### But wait, I want to download videos attached to tweets too!
+This is easily done, but it hasn't been implemented yet as I haven't yet needed that for my project. If you need this, please [open an issue](https://github.com/sbrl/twitter-academic-downloader/issues/new)! `deface` apparently supports videos, so this shouldn't be too difficult to add to `download-media.sh`.
+
+### Why is it taking ages to download tweets / media?
+Twitter implements a rate limiting policy, which `twitter-academic-downloader` must abide by. Consider using something like [GNU screen](https://www.gnu.org/software/screen/) to run jobs in the background.
+
+Despite this, when downloading tweets `twitter-academic-downloader` does it's best to make as few requests as possible to get the job done as fast as possible. It downloads 100 tweets at a time (the max allowed consistently by Twitter's API consistently), and it also batches the download of replies to fill the query length limit for each request - and tweets with no replies listed in the data returned from the API aren't queued for the downloading for replies.
+
+### Wow, that's a lot of asynchronous code. I want to extend / modify twitter-academic-downloader, but I don't understand it!
+Ah, sorry about that! twitter-academic-downloader is heavily asynchronous because of the inherent complexities involved in the downloading process (see the answer directly above this one for an idea as to the complexities involved). Because the task is IO heavy, it lends itself rather well to being asyncified. If you have a specfific question about the codebase, please do [open a discussion](https://github.com/sbrl/twitter-academic-downloader/discussions/2).
+
+Do note though that to use twitter-academic-downloader, you do not need to understand the neither Javascript nor twitter-academic-downloader's codebase.
 
 
 ## Analysing the data
