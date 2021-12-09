@@ -4,7 +4,7 @@
 
 This command-line program downloads tweets from twitter using the academic full-archive search endpoint and saves them to an output directory. It can:
 
- - Anonymise all tweets downloaded (this is automatic can _cannot_ be disabled)
+ - Anonymise all tweets downloaded (this is automatic and can _cannot_ be disabled)
  - Downloads all replies to tweets matched (optional)
 
 Note that tweets, users, and places are **not unique** until they are deduplicated by the post-processing script `post-process.sh` - more information about this in the [usage section below](#usage)
