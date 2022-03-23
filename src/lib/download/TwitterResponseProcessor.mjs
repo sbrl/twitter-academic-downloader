@@ -57,7 +57,8 @@ class TwitterResponseProcessor extends EventEmitter {
 			[
 				["QUERY", query || "***UNKNOWN***"],
 				["TIME_START", start_time.toISOString()],
-				["TIME_END", end_time instanceof Date ? end_time.toISOString() : ""]
+				["TIME_END", end_time instanceof Date ? end_time.toISOString() : ""],
+				["TIME_DOWNLOADED", (new Date()).toISOString()]
 			].map(item => `${item[0]}\t${item[1]}`).join("\n")
 		)
 	}
