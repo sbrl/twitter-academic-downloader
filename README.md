@@ -223,7 +223,7 @@ Twitter implements a rate limiting policy, which `twitter-academic-downloader` m
 Despite this, when downloading tweets `twitter-academic-downloader` does it's best to make as few requests as possible to get the job done as fast as possible. It downloads 100 tweets at a time (the max allowed consistently by Twitter's API consistently), and it also batches the download of replies to fill the query length limit for each request - and tweets with no replies listed in the data returned from the API aren't queued for the downloading for replies.
 
 ### Wow, that's a lot of asynchronous code. I want to extend / modify twitter-academic-downloader, but I don't understand it!
-Ah, sorry about that! twitter-academic-downloader is heavily asynchronous because of the inherent complexities involved in the downloading process (see the answer directly above this one for an idea as to the complexities involved). Because the task is IO heavy, it lends itself rather well to being asyncified. If you have a specfific question about the codebase, please do [open a discussion](https://github.com/sbrl/twitter-academic-downloader/discussions/2).
+Ah, sorry about that! twitter-academic-downloader is heavily asynchronous because of the inherent complexities involved in the downloading process (see the answer directly above this one for an idea as to the complexities involved). Because the task is IO heavy, it lends itself rather well to being asyncified. If you have a specific question about the codebase, please do [open a discussion](https://github.com/sbrl/twitter-academic-downloader/discussions/2).
 
 Do note though that to use twitter-academic-downloader, you do not need to understand the neither Javascript nor twitter-academic-downloader's codebase.
 
@@ -243,13 +243,13 @@ If you downloaded replies as well as the original tweets, they are all stored in
 Print only non-replies (beware, this also excludes original top-level tweets from the perspective of the original query you searched for that were themselves replies to other tweets):
 
 ```bash
-jq --raw-output 'select(.referenced_tweets == null or ([ .referenced_tweets[].type ] | index("replied_to") == null))' <tweets-labelled.jsonl
+jq --raw-output 'select(.referenced_tweets == null or ([ .referenced_tweets[].type ] | index("replied_to") == null))' <tweets.jsonl
 ```
 
 Print only replies (as above, this includes original tweets captured by the search query that were replies to other tweets):
 
 ```bash
-jq --raw-output 'select(.referenced_tweets != null) | select([ .referenced_tweets[].type ] | index("replied_to") != null)' <tweets-labelled.jsonl
+jq --raw-output 'select(.referenced_tweets != null) | select([ .referenced_tweets[].type ] | index("replied_to") != null)' <tweets.jsonl
 ```
 
 
