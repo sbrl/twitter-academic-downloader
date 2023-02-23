@@ -266,7 +266,7 @@ Then, open the resulting file in your favourite editor (e.g. Libreoffice Calc) t
 
 #### ....with sentiment
 
-To plot it with positive/negative sentiment (AFTER labelling a given dataset, labeller is in a separate repository - link coming soon), do the following to generate a tab-separated values (TSV) file:
+To plot it with positive/negative sentiment (AFTER labelling a given dataset, labeller is in [this repository](https://github.com/sbrl/research-smflooding.git)), do the following to generate a tab-separated values (TSV) file:
 
 ```bash
 jq --raw-output '[ .created_at, .label ] | @tsv' < "path/to/tweets-labelled.jsonl" | awk '{ gsub("T.*", "", $1); print( $1 "\t" $2); }' | sort | uniq -c | awk 'BEGIN { OFS="\t"; printf("DATE\tPOSITIVE\tNEGATIVE"); } { date=$2; sent=$3; count=$1; if(date != last_date) print(last_date, acc_positive, acc_negative); if(sent == "positive") acc_positive=count; else acc_negative=$1; last_date=$2; }' > "path/to/sentiment.tsv";
