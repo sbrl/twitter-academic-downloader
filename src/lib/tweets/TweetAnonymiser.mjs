@@ -75,7 +75,7 @@ class TweetAnonymiser {
 				}
 			}
 			
-			// Anonyise all mentions & convert to a list of strings instead
+			// Anonymise all mentions & convert to a list of strings instead
 			if(typeof tweet.entities.mentions === "object") {
 				let mentions = [];
 				for(let mention of tweet.entities.mentions) {
