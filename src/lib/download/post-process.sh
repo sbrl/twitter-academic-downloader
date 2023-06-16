@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 target_dir="${1}";
+flag="${2}";
 
 if [[ -z "${target_dir}" ]]; then
 	echo "Error: No target directory specified." >&2;
@@ -26,6 +27,30 @@ get_length() {
 	wc -l "${target}" | cut -d' ' -f1;
 }
 
+mv_safe() {
+	source="$1";
+	target="$2";
+	
+	if [[ -z "$source" ]]; then
+		echo "mv_safe error: no source file specified." >&2;
+		return 1;
+	fi
+	if [[ -z "$target" ]]; then
+		echo "mv_safe error: no target file specified." >&2;
+		return 1;
+	fi
+	if [[ ! -e "$source" ]]; then
+		echo "mv_safe error: the source file doesn't exist." >&2;
+		return 2;
+	fi
+	if [[ -s "$source" ]]; then
+		echo "mv_safe error: refusing to move empty source file." >&2;
+		return 3;
+	fi
+	
+	mv -f "${source}" "${target}";
+}
+
 display_ratio() {
 	a="${1}";
 	b="${2}";
@@ -49,24 +74,34 @@ display_ratio() {
 ###############################################################################
 
 jq --slurp -c 'unique_by(.id) | .[]' <places.jsonl >places-unique.jsonl;
+exit_code="$?";
 echo -n "places:";
-display_ratio "places.jsonl" "places-unique.jsonl";
-
-rm places.jsonl;
-mv places-unique.jsonl places.jsonl;
+if [[ "$exit_code" -ne 0 ]]; then
+	echo "error code $exit_code while sorting.";
+else
+	display_ratio "places.jsonl" "places-unique.jsonl";
+	mv_safe places-unique.jsonl places.jsonl;
+fi
 
 
 jq --slurp -c 'unique_by(.id) | .[]' <users.jsonl >users-unique.jsonl;
+exit_code="$?";
 echo -n "users:";
-display_ratio "users.jsonl" "users-unique.jsonl";
+if [[ "$exit_code" -ne 0 ]]; then
+	echo "error code $exit_code while sorting.";
+else
+	display_ratio "users.jsonl" "users-unique.jsonl";
+	mv_safe users-unique.jsonl users.jsonl;
+fi
 
-rm users.jsonl;
-mv users-unique.jsonl users.jsonl;
-
-
-jq --slurp -c 'unique_by(.id) | .[]' <tweets.jsonl >tweets-unique.jsonl;
-echo -n "tweets:";
-display_ratio "tweets.jsonl" "tweets-unique.jsonl";
-
-rm tweets.jsonl;
-mv tweets-unique.jsonl tweets.jsonl;
+if [[ "${flag}" != "notweets" ]]; then
+	jq --slurp -c 'unique_by(.id) | .[]' <tweets.jsonl >tweets-unique.jsonl;
+	exit_code="$?";
+	echo -n "tweets:";
+	if [[ "$exit_code" -ne 0 ]]; then
+		echo "error code $exit_code while sorting.";
+	else
+		display_ratio "tweets.jsonl" "tweets-unique.jsonl";
+		mv_safe tweets-unique.jsonl tweets.jsonl;
+	fi
+fi

@@ -20,6 +20,7 @@ npm install --save twitter-academic-downloader
  - Update FAQ with section on downloading media
  - Add `TIME_DOWNLOADED` to output file `properties.tsv`
  - Remove `dynamic flood mapping` from user agent string
+ - Increase robustness and safety of `post_process.sh`
 
 
 ## v1.4
