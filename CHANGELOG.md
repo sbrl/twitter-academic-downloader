@@ -15,12 +15,15 @@ npm install --save twitter-academic-downloader
 -----
 
 
-## v1.4.1 (unreleased)
+## v1.4.2 (unreleased)
+ - Increase robustness and safety of `post_process.sh`
+
+
+## v1.4.1 - 12th July 2022
  - Update dependencies
  - Update FAQ with section on downloading media
  - Add `TIME_DOWNLOADED` to output file `properties.tsv`
  - Remove `dynamic flood mapping` from user agent string
- - Increase robustness and safety of `post_process.sh`
 
 
 ## v1.4
