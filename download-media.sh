@@ -39,7 +39,7 @@ check_command deface;
 check_command mogrify;
 
 optimise_png_binary=oxipng;
-optimise_png_flags="-omax -Dpq --fix";
+optimise_png_flags="-omax -pq --fix";
 optimise_jpeg_binary=jpegoptim;
 if ! command_exists jpegoptim; then
 	echo "jpegoptim not detected, not optimising JPEG images" >&2;
