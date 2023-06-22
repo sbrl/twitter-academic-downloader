@@ -60,6 +60,8 @@ delay="1";	# The delay between requests - in seconds
 curl_user_agent="twitter-academic-downloader (Bash; $(uname) $(arch); +https://www.npmjs.com/package/twitter-academic-downloader) curl/$(curl --version | awk '{ print $2; exit }')";
 
 downloaded_count="0";
+skipped_count="0";
+deface_failure_count="0";
 
 ###############################################################################
 
@@ -101,7 +103,10 @@ download_single() {
 	
 	# Don't download things twice
 	if [[ -e "${PWD}/${filename}" ]]; then
-		echo -e "${filename} already exists; skipping";
+		# echo -e "${filename} already exists; skipping";
+		skipped_count="$((skipped_count + 1))";
+		
+		echo -ne "${downloaded_count} ok | ${skipped_count} skip | ${deface_failure_count} fail >>> latest: ${url} [ skip ]\r";
 		return 0;
 	fi
 	
@@ -115,19 +120,22 @@ download_single() {
 	
 	# Strip the alpha channel from PNGs - deface doesn't like transparent PNGs apparently :-/
 	if [[ "${extension}" == "png" ]] || [[ "${extension}" == "PNG" ]]; then
-		echo "Stripping alpha channel from image" >&2;
+		echo -n "Stripping alpha channel from image" >&2;
 		mogrify -background white -alpha remove -alpha off -flatten "${filename}";
 	fi
 	
 	deface -o "${filename}" "${filename}" >/dev/null; # Blur faces
 	if [[ "$?" -ne 0 ]]; then
 		rm "${filename}";					# if deface fails, we can't risk keeping the image
+		deface_failure_count="$((deface_failure_count + 1))";
+		echo -ne "${downloaded_count} ok | ${skipped_count} skip | ${deface_failure_count} fail >>> latest: ${url} [ fail ]\r";
+		return 0;
 	else
 		optimise_image "${filename}";		# Optimise the image to reduce filesize
 	fi
 	
 	downloaded_count="$((downloaded_count + 1))";
-	echo -ne "${downloaded_count} downloaded so far; latest: ${url}\r";
+	echo -ne "${downloaded_count} ok | ${skipped_count} skip | ${deface_failure_count} fail >>> latest: ${url} [  ok  ]\r";
 	
 	# Calculate the time remaining we need to wait before making the next request
 	time_elapsed="$((($(date +%s%N) - time_start) / 1000000))";
